@@ -119,6 +119,8 @@
   .data-io-status { font-size: 12px; margin-top: 8px; min-height: 16px; }
   .data-io-status.success { color: var(--success); }
   .data-io-status.error { color: var(--series-8); }
+  .hist-delete-btn { appearance: none; border: 1px solid var(--series-8); background: transparent; color: var(--series-8); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .hist-delete-btn:hover { background: var(--series-8); color: #fff; }
 </style>
 </head>
 <body class="viz-root">
@@ -818,15 +820,33 @@
     var groups = groupLogsForDisplay(filtered);
     var wrap = document.getElementById("historyTableWrap");
     if (groups.length === 0) { wrap.innerHTML = '<div class="empty-state">記録がありません。</div>'; return; }
-    var html = '<table class="data-table"><thead><tr><th>日付</th><th>種目</th><th class="num">重量(kg)</th><th class="num">回数</th><th class="num">セット数</th></tr></thead><tbody>';
+    var html = '<table class="data-table"><thead><tr><th>日付</th><th>種目</th><th class="num">重量(kg)</th><th class="num">回数</th><th class="num">セット数</th><th></th></tr></thead><tbody>';
     groups.forEach(function (g) {
       var ex = exerciseById(g.exerciseId);
+      var key = g.date + "|" + g.exerciseId + "|" + g.weight + "|" + g.reps;
       html += "<tr><td>" + formatDateShort(g.date) + "</td><td>" + escapeHtml(ex ? ex.name : "（削除済み）") + "</td>" +
-        "<td class='num'>" + g.weight + "</td><td class='num'>" + g.reps + "</td><td class='num'>" + g.count + "</td></tr>";
+        "<td class='num'>" + g.weight + "</td><td class='num'>" + g.reps + "</td><td class='num'>" + g.count + "</td>" +
+        "<td><button type='button' class='hist-delete-btn' data-key=\"" + escapeHtml(key) + "\">削除</button></td></tr>";
     });
     wrap.innerHTML = html + "</tbody></table>";
   }
   document.getElementById("histExerciseFilter").addEventListener("change", renderHistoryTable);
+
+  document.getElementById("historyTableWrap").addEventListener("click", function (evt) {
+    var btn = evt.target.closest ? evt.target.closest(".hist-delete-btn") : null;
+    if (!btn) return;
+    var key = btn.getAttribute("data-key");
+    var parts = key.split("|");
+    var date = parts[0], exId2 = parts[1], weight = parseFloat(parts[2]), reps = parseFloat(parts[3]);
+    var ex = exerciseById(exId2);
+    var label = (ex ? ex.name : "（削除済み）") + " " + weight + "kg×" + reps + "回（" + formatDateShort(date) + "）";
+    if (!window.confirm(label + " をすべて削除しますか？この操作は元に戻せません。")) return;
+    state.logs = state.logs.filter(function (l) {
+      return !(l.date === date && l.exerciseId === exId2 && l.weight === weight && l.reps === reps);
+    });
+    persistState();
+    renderAll();
+  });
 
   function renderHistory() {
     populateFilterOptions(document.getElementById("histExerciseFilter"), true);
