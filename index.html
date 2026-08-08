@@ -60,6 +60,7 @@
   .stat-tile .value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .stat-tile .value.delta-up { color: var(--success); }
   select { font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--baseline); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); }
+  input[type="text"], input[type="number"], input[type="date"] { font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--baseline); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); width: 100%; box-sizing: border-box; }
   .filter-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; align-items: flex-end; }
   .filter-item { display: flex; flex-direction: column; min-width: 160px; }
   label.field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
@@ -124,11 +125,12 @@
 
 <header class="app-header">
   <h1>🏋️ 筋トレ記録ダッシュボード</h1>
-  <p>Claudeとの会話で記録した内容を可視化しています（このファイルは閲覧専用のスナップショットです）</p>
+  <p>Claudeとの会話、または「記録を追加」タブからの直接入力で記録した内容を可視化しています</p>
 </header>
 
 <nav class="tabs">
   <button data-tab="dashboard" class="active">ダッシュボード</button>
+  <button data-tab="add">記録を追加</button>
   <button data-tab="history">履歴</button>
   <button data-tab="menu">種目一覧</button>
 </nav>
@@ -189,6 +191,54 @@
         <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
         <details class="table-toggle"><summary>表で見る</summary><div id="weightTableWrap"></div></details>
       </div>
+    </div>
+  </section>
+
+  <section id="add" class="panel">
+    <div class="card">
+      <h2>記録を追加<span class="sub">その場でこのブラウザに保存されます（Claudeとの会話は不要）</span></h2>
+      <div class="filter-row">
+        <div class="filter-item"><label class="field-label">種目</label>
+          <select id="addExercise"></select>
+        </div>
+        <div class="filter-item"><label class="field-label">日付</label>
+          <input type="date" id="addDate">
+        </div>
+        <div class="filter-item"><label class="field-label">重量(kg)</label>
+          <input type="number" id="addWeight" step="0.5" min="0" placeholder="例：75（自重なら0）">
+        </div>
+        <div class="filter-item"><label class="field-label">回数</label>
+          <input type="number" id="addReps" step="1" min="1" placeholder="例：10">
+        </div>
+        <div class="filter-item"><label class="field-label">セット数</label>
+          <input type="number" id="addSets" step="1" min="1" value="1">
+        </div>
+      </div>
+      <button type="button" id="addSubmitBtn" class="data-io-btn">記録を追加</button>
+      <p id="addStatus" class="data-io-status"></p>
+      <p class="generated-note" style="margin-top:10px;">この方法で追加した記録は、このブラウザにしか保存されません。他の端末やClaude側のデータにも反映したい場合は、下の「種目一覧」タブにある「書き出す」でJSONを書き出し、Claudeに送ってください。</p>
+    </div>
+
+    <div class="card">
+      <h2>新しい種目を登録</h2>
+      <div class="filter-row">
+        <div class="filter-item"><label class="field-label">種目名</label>
+          <input type="text" id="newExerciseName" placeholder="例：カーフレイズ">
+        </div>
+        <div class="filter-item"><label class="field-label">部位</label>
+          <select id="newExerciseCategory">
+            <option value="胸">胸</option>
+            <option value="背中">背中</option>
+            <option value="脚">脚</option>
+            <option value="肩">肩</option>
+            <option value="腕">腕</option>
+            <option value="体幹">体幹</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" id="addExerciseBtn" class="data-io-btn">種目を登録</button>
+      <p id="addExerciseStatus" class="data-io-status"></p>
     </div>
   </section>
 
@@ -790,6 +840,7 @@
     renderDashboard();
     renderHistory();
     updateDataStatusLine();
+    populateAddExerciseSelect();
   }
 
   function importFromRawText(raw) {
@@ -849,6 +900,132 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  // ---- add record / add exercise (direct input, no chat needed) ----
+  function pad2(n) {
+    n = String(n);
+    return n.length < 2 ? "0" + n : n;
+  }
+
+  function todayDateInputValue() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  }
+
+  function generateLogId() {
+    return "log_" + Date.now().toString(16) + Math.random().toString(16).slice(2, 8);
+  }
+
+  function populateAddExerciseSelect() {
+    var sel = document.getElementById("addExercise");
+    var prev = sel.value;
+    sel.innerHTML = "";
+    if (state.exercises.length === 0) {
+      var opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "（先に種目を登録してください）";
+      sel.appendChild(opt);
+      return;
+    }
+    state.exercises.forEach(function (ex) {
+      var o = document.createElement("option");
+      o.value = ex.id;
+      o.textContent = ex.name;
+      sel.appendChild(o);
+    });
+    if (prev && exerciseById(prev)) sel.value = prev;
+    var dateEl = document.getElementById("addDate");
+    if (!dateEl.value) dateEl.value = todayDateInputValue();
+  }
+
+  document.getElementById("addSubmitBtn").addEventListener("click", function () {
+    var statusEl = document.getElementById("addStatus");
+    var exId = document.getElementById("addExercise").value;
+    var date = document.getElementById("addDate").value;
+    var weight = parseFloat(document.getElementById("addWeight").value);
+    var reps = parseInt(document.getElementById("addReps").value, 10);
+    var sets = parseInt(document.getElementById("addSets").value, 10);
+
+    if (!exId) {
+      statusEl.textContent = "種目を選択してください。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+    if (!date) {
+      statusEl.textContent = "日付を入力してください。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+    if (isNaN(weight) || weight < 0) {
+      statusEl.textContent = "重量を正しく入力してください（自重種目は0でOKです）。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+    if (!reps || reps < 1) {
+      statusEl.textContent = "回数を正しく入力してください。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+    if (!sets || sets < 1) {
+      statusEl.textContent = "セット数を正しく入力してください。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+
+    var existing = state.logs.filter(function (l) { return l.exerciseId === exId && l.date === date; });
+    var maxSetNumber = existing.reduce(function (m, l) { return Math.max(m, l.setNumber); }, 0);
+
+    for (var i = 1; i <= sets; i++) {
+      state.logs.push({
+        id: generateLogId(),
+        exerciseId: exId,
+        date: date,
+        weight: weight,
+        reps: reps,
+        setNumber: maxSetNumber + i
+      });
+    }
+
+    persistState();
+    var ex = exerciseById(exId);
+    statusEl.textContent = (ex ? ex.name : "") + " " + weight + "kg×" + reps + "回×" + sets + "セットを追加しました（このブラウザに保存済み）。";
+    statusEl.className = "data-io-status success";
+    document.getElementById("addWeight").value = "";
+    document.getElementById("addReps").value = "";
+    document.getElementById("addSets").value = "1";
+    renderAll();
+  });
+
+  document.getElementById("addExerciseBtn").addEventListener("click", function () {
+    var statusEl = document.getElementById("addExerciseStatus");
+    var name = document.getElementById("newExerciseName").value.trim();
+    var category = document.getElementById("newExerciseCategory").value;
+    if (!name) {
+      statusEl.textContent = "種目名を入力してください。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+    var dup = state.exercises.some(function (e) { return e.name === name; });
+    if (dup) {
+      statusEl.textContent = "同じ名前の種目がすでに登録されています。";
+      statusEl.className = "data-io-status error";
+      return;
+    }
+    var maxNum = 0;
+    state.exercises.forEach(function (e) {
+      var m = /^ex(\d+)$/.exec(e.id);
+      if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+    });
+    var idStr = String(maxNum + 1);
+    while (idStr.length < 2) idStr = "0" + idStr;
+    var newId = "ex" + idStr;
+    state.exercises.push({ id: newId, name: name, category: category });
+    persistState();
+    document.getElementById("newExerciseName").value = "";
+    statusEl.textContent = name + "（" + category + "）を登録しました。";
+    statusEl.className = "data-io-status success";
+    renderAll();
   });
 
   renderAll();
