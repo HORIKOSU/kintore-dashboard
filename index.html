@@ -119,8 +119,17 @@
   .data-io-status { font-size: 12px; margin-top: 8px; min-height: 16px; }
   .data-io-status.success { color: var(--success); }
   .data-io-status.error { color: var(--series-8); }
+  .hist-row-actions { display: flex; gap: 6px; }
   .hist-delete-btn { appearance: none; border: 1px solid var(--series-8); background: transparent; color: var(--series-8); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
   .hist-delete-btn:hover { background: var(--series-8); color: #fff; }
+  .hist-edit-btn { appearance: none; border: 1px solid var(--series-1); background: transparent; color: var(--series-1); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .hist-edit-btn:hover { background: var(--series-1); color: #fff; }
+  .hist-edit-row input, .hist-edit-row select { width: 100%; box-sizing: border-box; font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); }
+  .hist-edit-actions { display: flex; gap: 6px; }
+  .hist-save-btn { appearance: none; border: 1px solid var(--success); background: var(--success); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .hist-save-btn:hover { opacity: 0.9; }
+  .hist-cancel-btn { appearance: none; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .hist-cancel-btn:hover { background: var(--surface-1); }
 </style>
 </head>
 <body class="viz-root">
@@ -813,6 +822,7 @@
   document.getElementById("weightYearFilter").addEventListener("change", renderWeightChart);
 
   // ---- history ----
+  var historyEditingKey = null;
   function renderHistoryTable() {
     var exId = document.getElementById("histExerciseFilter").value;
     var filtered = state.logs.filter(function (l) { return exId === "__all__" || l.exerciseId === exId; })
@@ -824,18 +834,89 @@
     groups.forEach(function (g) {
       var ex = exerciseById(g.exerciseId);
       var key = g.date + "|" + g.exerciseId + "|" + g.weight + "|" + g.reps;
-      html += "<tr><td>" + formatDateShort(g.date) + "</td><td>" + escapeHtml(ex ? ex.name : "（削除済み）") + "</td>" +
-        "<td class='num'>" + g.weight + "</td><td class='num'>" + g.reps + "</td><td class='num'>" + g.count + "</td>" +
-        "<td><button type='button' class='hist-delete-btn' data-key=\"" + escapeHtml(key) + "\">削除</button></td></tr>";
+      if (key === historyEditingKey) {
+        var exOptions = state.exercises.map(function (e) {
+          return '<option value="' + e.id + '"' + (e.id === g.exerciseId ? " selected" : "") + '>' + escapeHtml(e.name) + '</option>';
+        }).join("");
+        html += "<tr class='hist-edit-row' data-key=\"" + escapeHtml(key) + "\">" +
+          "<td><input type='date' class='hist-edit-date' value='" + g.date + "'></td>" +
+          "<td><select class='hist-edit-exercise'>" + exOptions + "</select></td>" +
+          "<td class='num'><input type='number' class='hist-edit-weight' value='" + g.weight + "' step='0.5' min='0'></td>" +
+          "<td class='num'><input type='number' class='hist-edit-reps' value='" + g.reps + "' step='1' min='1'></td>" +
+          "<td class='num'><input type='number' class='hist-edit-count' value='" + g.count + "' step='1' min='1'></td>" +
+          "<td class='hist-edit-actions'><button type='button' class='hist-save-btn'>保存</button><button type='button' class='hist-cancel-btn'>キャンセル</button></td></tr>";
+      } else {
+        html += "<tr><td>" + formatDateShort(g.date) + "</td><td>" + escapeHtml(ex ? ex.name : "（削除済み）") + "</td>" +
+          "<td class='num'>" + g.weight + "</td><td class='num'>" + g.reps + "</td><td class='num'>" + g.count + "</td>" +
+          "<td class='hist-row-actions'><button type='button' class='hist-edit-btn' data-key=\"" + escapeHtml(key) + "\">編集</button>" +
+          "<button type='button' class='hist-delete-btn' data-key=\"" + escapeHtml(key) + "\">削除</button></td></tr>";
+      }
     });
     wrap.innerHTML = html + "</tbody></table>";
   }
-  document.getElementById("histExerciseFilter").addEventListener("change", renderHistoryTable);
+  document.getElementById("histExerciseFilter").addEventListener("change", function () {
+    historyEditingKey = null;
+    renderHistoryTable();
+  });
 
   document.getElementById("historyTableWrap").addEventListener("click", function (evt) {
-    var btn = evt.target.closest ? evt.target.closest(".hist-delete-btn") : null;
-    if (!btn) return;
-    var key = btn.getAttribute("data-key");
+    var editBtn = evt.target.closest ? evt.target.closest(".hist-edit-btn") : null;
+    if (editBtn) {
+      historyEditingKey = editBtn.getAttribute("data-key");
+      renderHistoryTable();
+      return;
+    }
+
+    var cancelBtn = evt.target.closest ? evt.target.closest(".hist-cancel-btn") : null;
+    if (cancelBtn) {
+      historyEditingKey = null;
+      renderHistoryTable();
+      return;
+    }
+
+    var saveBtn = evt.target.closest ? evt.target.closest(".hist-save-btn") : null;
+    if (saveBtn) {
+      var row = saveBtn.closest("tr");
+      var oldParts = row.getAttribute("data-key").split("|");
+      var oldDate = oldParts[0], oldExId = oldParts[1], oldWeight = parseFloat(oldParts[2]), oldReps = parseFloat(oldParts[3]);
+
+      var newDate = row.querySelector(".hist-edit-date").value;
+      var newExId = row.querySelector(".hist-edit-exercise").value;
+      var newWeight = parseFloat(row.querySelector(".hist-edit-weight").value);
+      var newReps = parseInt(row.querySelector(".hist-edit-reps").value, 10);
+      var newCount = parseInt(row.querySelector(".hist-edit-count").value, 10);
+
+      if (!newDate || !newExId || isNaN(newWeight) || newWeight < 0 || !newReps || newReps < 1 || !newCount || newCount < 1) {
+        window.alert("入力内容を確認してください（日付・種目・重量・回数・セット数はすべて必須です。重量は0以上、回数とセット数は1以上にしてください）。");
+        return;
+      }
+
+      state.logs = state.logs.filter(function (l) {
+        return !(l.date === oldDate && l.exerciseId === oldExId && l.weight === oldWeight && l.reps === oldReps);
+      });
+
+      var existing = state.logs.filter(function (l) { return l.exerciseId === newExId && l.date === newDate; });
+      var maxSetNumber = existing.reduce(function (m, l) { return Math.max(m, l.setNumber); }, 0);
+      for (var i = 1; i <= newCount; i++) {
+        state.logs.push({
+          id: generateLogId(),
+          exerciseId: newExId,
+          date: newDate,
+          weight: newWeight,
+          reps: newReps,
+          setNumber: maxSetNumber + i
+        });
+      }
+
+      persistState();
+      historyEditingKey = null;
+      renderAll();
+      return;
+    }
+
+    var delBtn = evt.target.closest ? evt.target.closest(".hist-delete-btn") : null;
+    if (!delBtn) return;
+    var key = delBtn.getAttribute("data-key");
     var parts = key.split("|");
     var date = parts[0], exId2 = parts[1], weight = parseFloat(parts[2]), reps = parseFloat(parts[3]);
     var ex = exerciseById(exId2);
