@@ -140,13 +140,36 @@
   .hist-entry-name { font-weight: 600; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
   .hist-entry-detail { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .hist-entry-edit { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--surface-1); border: 1px solid var(--series-1); border-radius: 8px; }
-  .menu-block { margin-bottom: 16px; }
-  .menu-block:last-of-type { margin-bottom: 8px; }
-  .menu-day-title { font-size: 13px; font-weight: 700; color: var(--series-1); margin: 0 0 8px; }
+  .menu-day { margin-bottom: 22px; }
+  .menu-day:last-of-type { margin-bottom: 8px; }
+  .menu-day-heading { display: flex; align-items: center; gap: 10px; padding-bottom: 9px; margin-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .menu-day-badge { display: inline-block; flex-shrink: 0; font-size: 11px; font-weight: 700; color: #fff; background: var(--series-1); padding: 4px 11px; border-radius: 999px; letter-spacing: 0.02em; }
+  .menu-day-badge-alt { background: var(--series-2); }
+  .menu-day-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
   .menu-list { list-style: decimal; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
   .menu-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
   .menu-ex-name { font-weight: 600; color: var(--text-primary); }
   .menu-ex-detail { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .body-diagram-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+  .body-diagram-svg { width: 100%; max-width: 420px; height: auto; }
+  .body-diagram-title { font-size: 11px; font-weight: 700; fill: var(--text-secondary); }
+  .body-diagram-label { font-size: 11px; font-weight: 700; fill: #fff; pointer-events: none; }
+  .bd-neutral { fill: var(--border); }
+  .bd-shoulder { fill: var(--series-4); }
+  .bd-chest { fill: var(--series-1); }
+  .bd-back { fill: var(--series-2); }
+  .bd-core { fill: var(--series-6); }
+  .bd-arm { fill: var(--series-7); }
+  .bd-leg { fill: var(--series-3); }
+  .body-legend { display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center; padding-top: 10px; border-top: 1px solid var(--gridline); }
+  .body-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .body-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .body-part-group { margin-bottom: 14px; }
+  .body-part-group:last-child { margin-bottom: 0; }
+  .body-part-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .body-part-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .body-part-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .body-part-exercises { font-size: 13px; color: var(--text-secondary); padding-left: 18px; }
   .hist-edit-fields { display: flex; flex-wrap: wrap; gap: 10px; }
   .hist-edit-field { display: flex; flex-direction: column; gap: 3px; min-width: 110px; flex: 1 1 110px; }
   .hist-edit-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
@@ -179,6 +202,8 @@
   <button data-tab="add">記録を追加</button>
   <button data-tab="history">履歴</button>
   <button data-tab="menu">種目一覧</button>
+  <button data-tab="trainingMenu">トレーニングメニュー</button>
+  <button data-tab="bodyGuide">部位ガイド</button>
 </nav>
 
 <main>
@@ -325,18 +350,21 @@
       <p class="generated-note" style="margin-top:14px;">種目の追加はClaudeとの会話、または「記録を追加」タブの「新しい種目を登録」からできます。</p>
     </div>
 
+  </section>
+
+  <section id="trainingMenu" class="panel">
     <div class="card">
-      <h2>おすすめトレーニングメニュー<span class="sub">肘・上腕（力こぶ〜二の腕）を鍛える週2回メニュー</span></h2>
-      <div class="menu-block">
-        <h3 class="menu-day-title">Day A：三頭筋メイン</h3>
+      <h2>腕トレーニングメニュー<span class="sub">肘・上腕（力こぶ〜二の腕）を鍛える週2回メニュー</span></h2>
+      <div class="menu-day">
+        <div class="menu-day-heading"><span class="menu-day-badge">Day A</span><span class="menu-day-name">三頭筋メイン</span></div>
         <ol class="menu-list">
           <li><span class="menu-ex-name">クローズグリップベンチプレス</span><span class="menu-ex-detail">3〜4セット × 8〜10回</span></li>
           <li><span class="menu-ex-name">トライセプスエクステンション</span><span class="menu-ex-detail">3セット × 10〜12回</span></li>
           <li><span class="menu-ex-name">ハンマーカール（補助）</span><span class="menu-ex-detail">2〜3セット × 10〜12回</span></li>
         </ol>
       </div>
-      <div class="menu-block">
-        <h3 class="menu-day-title">Day B：二頭筋メイン</h3>
+      <div class="menu-day">
+        <div class="menu-day-heading"><span class="menu-day-badge menu-day-badge-alt">Day B</span><span class="menu-day-name">二頭筋メイン</span></div>
         <ol class="menu-list">
           <li><span class="menu-ex-name">アームカール</span><span class="menu-ex-detail">3セット × 8〜12回</span></li>
           <li><span class="menu-ex-name">ハンマーカール</span><span class="menu-ex-detail">3セット × 10〜12回</span></li>
@@ -344,6 +372,60 @@
         </ol>
       </div>
       <p class="generated-note">週2回、中2〜3日空けて実施。上腕三頭筋は上腕全体の6〜7割を占めるとされるため、腕を太くしたい場合は三頭筋を軸に。重量は「最後の1〜2回がギリギリ挙がる」強度を目安に少しずつ増やす。</p>
+    </div>
+  </section>
+
+  <section id="bodyGuide" class="panel">
+    <div class="card">
+      <h2>筋肉の部位ガイド<span class="sub">種目の「部位」がどこを指すか、正面・背面のイラストで確認</span></h2>
+      <div class="body-diagram-wrap">
+        <svg viewBox="0 0 340 300" class="body-diagram-svg" role="img" aria-label="正面と背面から見た体の部位図">
+          <!-- FRONT -->
+          <g transform="translate(5,10)">
+            <text x="75" y="14" text-anchor="middle" class="body-diagram-title">正面</text>
+            <ellipse cx="44" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
+            <ellipse cx="106" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
+            <rect x="27" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <rect x="107" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <rect x="48" y="48" width="54" height="40" rx="10" class="bd-chest"></rect>
+            <text x="75" y="72" text-anchor="middle" class="body-diagram-label">胸</text>
+            <rect x="52" y="86" width="46" height="42" rx="8" class="bd-core"></rect>
+            <text x="75" y="111" text-anchor="middle" class="body-diagram-label">体幹</text>
+            <rect x="54" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <rect x="76" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <rect x="68" y="34" width="14" height="10" class="bd-neutral"></rect>
+            <circle cx="75" cy="22" r="18" class="bd-neutral"></circle>
+          </g>
+          <!-- BACK -->
+          <g transform="translate(185,10)">
+            <text x="75" y="14" text-anchor="middle" class="body-diagram-title">背面</text>
+            <ellipse cx="44" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
+            <ellipse cx="106" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
+            <rect x="27" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <rect x="107" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <rect x="48" y="48" width="54" height="80" rx="10" class="bd-back"></rect>
+            <text x="75" y="90" text-anchor="middle" class="body-diagram-label">背中</text>
+            <rect x="54" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <rect x="76" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <rect x="68" y="34" width="14" height="10" class="bd-neutral"></rect>
+            <circle cx="75" cy="22" r="18" class="bd-neutral"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="body-legend">
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-1)"></span>胸</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-2)"></span>背中</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-4)"></span>肩</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-7)"></span>腕</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-6)"></span>体幹（腹筋まわり）</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-3)"></span>脚</div>
+      </div>
+      <p class="generated-note">腕・脚・肩は正面・背面どちらにも共通するため同じ色で表示しています（腕：力こぶ側と二の腕側、脚：前もも側と裏もも・ふくらはぎ側）。</p>
+    </div>
+
+    <div class="card">
+      <h2>部位ごとの登録種目</h2>
+      <div id="bodyGuideExerciseList"></div>
     </div>
   </section>
 </main>
@@ -399,6 +481,11 @@
     for (var i = 0; i < state.exercises.length; i++) { if (state.exercises[i].id === id) { idx = i; break; } }
     return "var(--series-" + ((idx % 8) + 1) + ")";
   }
+  var CATEGORY_COLOR_MAP = { "胸": "var(--series-1)", "背中": "var(--series-2)", "脚": "var(--series-3)", "肩": "var(--series-4)", "体幹": "var(--series-6)", "腕": "var(--series-7)" };
+  var CATEGORY_ORDER = ["胸", "背中", "肩", "腕", "体幹", "脚", "その他"];
+  function categoryColorVar(category) {
+    return CATEGORY_COLOR_MAP[category] || "var(--series-5)";
+  }
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, function (c) {
       return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
@@ -447,6 +534,27 @@
         '<span class="badge">' + escapeHtml(ex.category) + '</span><span class="badge">記録 ' + count + '件</span></div></div>';
     });
     list.innerHTML = html;
+  }
+
+  function renderBodyGuideList() {
+    var wrap = document.getElementById("bodyGuideExerciseList");
+    if (!wrap) return;
+    if (state.exercises.length === 0) { wrap.innerHTML = '<div class="empty-state">まだ種目が登録されていません。</div>'; return; }
+    var byCategory = {};
+    state.exercises.forEach(function (ex) {
+      var cat = ex.category || "その他";
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push(ex.name);
+    });
+    var cats = CATEGORY_ORDER.filter(function (c) { return byCategory[c]; });
+    Object.keys(byCategory).forEach(function (c) { if (cats.indexOf(c) === -1) cats.push(c); });
+    var html = "";
+    cats.forEach(function (cat) {
+      html += '<div class="body-part-group"><div class="body-part-heading"><span class="body-part-dot" style="background:' + categoryColorVar(cat) + '"></span>' +
+        '<span class="body-part-name">' + escapeHtml(cat) + '</span></div>' +
+        '<div class="body-part-exercises">' + byCategory[cat].map(escapeHtml).join("、") + '</div></div>';
+    });
+    wrap.innerHTML = html;
   }
 
   // ---- calendar ----
@@ -1021,6 +1129,7 @@
   // ---- data import / export ----
   function renderAll() {
     renderMenu();
+    renderBodyGuideList();
     initCalendar();
     renderDashboard();
     renderHistory();
