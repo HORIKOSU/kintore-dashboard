@@ -119,17 +119,44 @@
   .data-io-status { font-size: 12px; margin-top: 8px; min-height: 16px; }
   .data-io-status.success { color: var(--success); }
   .data-io-status.error { color: var(--series-8); }
-  .hist-row-actions { display: flex; gap: 6px; }
+  .hist-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .hist-delete-btn { appearance: none; border: 1px solid var(--series-8); background: transparent; color: var(--series-8); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
   .hist-delete-btn:hover { background: var(--series-8); color: #fff; }
   .hist-edit-btn { appearance: none; border: 1px solid var(--series-1); background: transparent; color: var(--series-1); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
   .hist-edit-btn:hover { background: var(--series-1); color: #fff; }
-  .hist-edit-row input, .hist-edit-row select { width: 100%; box-sizing: border-box; font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); }
-  .hist-edit-actions { display: flex; gap: 6px; }
-  .hist-save-btn { appearance: none; border: 1px solid var(--success); background: var(--success); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .hist-save-btn { appearance: none; border: 1px solid var(--success); background: var(--success); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
   .hist-save-btn:hover { opacity: 0.9; }
-  .hist-cancel-btn { appearance: none; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
-  .hist-cancel-btn:hover { background: var(--surface-1); }
+  .hist-cancel-btn { appearance: none; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 12px; padding: 6px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .hist-cancel-btn:hover { background: var(--page-plane); }
+  .hist-groups { display: flex; flex-direction: column; gap: 14px; }
+  .hist-date-group { background: var(--page-plane); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px 4px; }
+  .hist-date-heading { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .hist-date-label { font-size: 14px; font-weight: 700; color: var(--series-1); }
+  .hist-date-count { font-size: 10px; font-weight: 600; color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
+  .hist-date-body { display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; }
+  .hist-entry { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; padding: 9px 12px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; }
+  .hist-entry-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+  .hist-entry-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .hist-entry-name { font-weight: 600; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
+  .hist-entry-detail { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .hist-entry-edit { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--surface-1); border: 1px solid var(--series-1); border-radius: 8px; }
+  .hist-edit-fields { display: flex; flex-wrap: wrap; gap: 10px; }
+  .hist-edit-field { display: flex; flex-direction: column; gap: 3px; min-width: 110px; flex: 1 1 110px; }
+  .hist-edit-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+  .hist-edit-field input, .hist-edit-field select { width: 100%; box-sizing: border-box; font-size: 13px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); }
+  .hist-edit-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  @media (max-width: 600px) {
+    main { padding: 14px 12px; }
+    header.app-header { padding: 16px 14px 12px; }
+    .card { padding: 14px; }
+    .filter-item { min-width: 0; flex: 1 1 140px; }
+    .month-daily-row { flex-direction: column; gap: 3px; }
+    .month-daily-date { flex: none; }
+    .hist-entry-main { width: 100%; }
+    .hist-row-actions { width: 100%; justify-content: flex-end; }
+    .hist-edit-field { flex: 1 1 100%; }
+  }
 </style>
 </head>
 <body class="viz-root">
@@ -353,6 +380,12 @@
   function monthLabelShort(key) { var p = key.split("-"); return p[0].slice(2) + p[1]; }
   function formatDateShort(d) { var p = d.split("-"); return p[0].slice(2) + p[1] + p[2]; }
   function formatMonthDay(d) { var p = d.split("-"); return p[1] + "/" + p[2]; }
+  function formatDateHeading(d) {
+    var p = d.split("-");
+    var dt = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+    var wd = ["日", "月", "火", "水", "木", "金", "土"][dt.getDay()];
+    return parseInt(p[1], 10) + "月" + parseInt(p[2], 10) + "日（" + wd + "）";
+  }
   function groupLogsForDisplay(logs) {
     var map = {}, order = [];
     logs.forEach(function (l) {
@@ -830,29 +863,51 @@
     var groups = groupLogsForDisplay(filtered);
     var wrap = document.getElementById("historyTableWrap");
     if (groups.length === 0) { wrap.innerHTML = '<div class="empty-state">記録がありません。</div>'; return; }
-    var html = '<table class="data-table"><thead><tr><th>日付</th><th>種目</th><th class="num">重量(kg)</th><th class="num">回数</th><th class="num">セット数</th><th></th></tr></thead><tbody>';
+
+    var dateOrder = [];
+    var byDate = {};
     groups.forEach(function (g) {
-      var ex = exerciseById(g.exerciseId);
-      var key = g.date + "|" + g.exerciseId + "|" + g.weight + "|" + g.reps;
-      if (key === historyEditingKey) {
-        var exOptions = state.exercises.map(function (e) {
-          return '<option value="' + e.id + '"' + (e.id === g.exerciseId ? " selected" : "") + '>' + escapeHtml(e.name) + '</option>';
-        }).join("");
-        html += "<tr class='hist-edit-row' data-key=\"" + escapeHtml(key) + "\">" +
-          "<td><input type='date' class='hist-edit-date' value='" + g.date + "'></td>" +
-          "<td><select class='hist-edit-exercise'>" + exOptions + "</select></td>" +
-          "<td class='num'><input type='number' class='hist-edit-weight' value='" + g.weight + "' step='0.5' min='0'></td>" +
-          "<td class='num'><input type='number' class='hist-edit-reps' value='" + g.reps + "' step='1' min='1'></td>" +
-          "<td class='num'><input type='number' class='hist-edit-count' value='" + g.count + "' step='1' min='1'></td>" +
-          "<td class='hist-edit-actions'><button type='button' class='hist-save-btn'>保存</button><button type='button' class='hist-cancel-btn'>キャンセル</button></td></tr>";
-      } else {
-        html += "<tr><td>" + formatDateShort(g.date) + "</td><td>" + escapeHtml(ex ? ex.name : "（削除済み）") + "</td>" +
-          "<td class='num'>" + g.weight + "</td><td class='num'>" + g.reps + "</td><td class='num'>" + g.count + "</td>" +
-          "<td class='hist-row-actions'><button type='button' class='hist-edit-btn' data-key=\"" + escapeHtml(key) + "\">編集</button>" +
-          "<button type='button' class='hist-delete-btn' data-key=\"" + escapeHtml(key) + "\">削除</button></td></tr>";
-      }
+      if (!byDate[g.date]) { byDate[g.date] = []; dateOrder.push(g.date); }
+      byDate[g.date].push(g);
     });
-    wrap.innerHTML = html + "</tbody></table>";
+
+    var html = '<div class="hist-groups">';
+    dateOrder.forEach(function (date) {
+      var dayGroups = byDate[date];
+      html += '<div class="hist-date-group"><div class="hist-date-heading"><span class="hist-date-label">' +
+        escapeHtml(formatDateHeading(date)) + '</span><span class="hist-date-count">' + dayGroups.length + '件</span></div><div class="hist-date-body">';
+      dayGroups.forEach(function (g) {
+        var ex = exerciseById(g.exerciseId);
+        var key = g.date + "|" + g.exerciseId + "|" + g.weight + "|" + g.reps;
+        if (key === historyEditingKey) {
+          var exOptions = state.exercises.map(function (e) {
+            return '<option value="' + e.id + '"' + (e.id === g.exerciseId ? " selected" : "") + '>' + escapeHtml(e.name) + '</option>';
+          }).join("");
+          html += '<div class="hist-entry-edit" data-key="' + escapeHtml(key) + '">' +
+            '<div class="hist-edit-fields">' +
+            '<div class="hist-edit-field"><label>日付</label><input type="date" class="hist-edit-date" value="' + g.date + '"></div>' +
+            '<div class="hist-edit-field"><label>種目</label><select class="hist-edit-exercise">' + exOptions + '</select></div>' +
+            '<div class="hist-edit-field"><label>重量(kg)</label><input type="number" class="hist-edit-weight" value="' + g.weight + '" step="0.5" min="0"></div>' +
+            '<div class="hist-edit-field"><label>回数</label><input type="number" class="hist-edit-reps" value="' + g.reps + '" step="1" min="1"></div>' +
+            '<div class="hist-edit-field"><label>セット数</label><input type="number" class="hist-edit-count" value="' + g.count + '" step="1" min="1"></div>' +
+            '</div>' +
+            '<div class="hist-edit-actions"><button type="button" class="hist-save-btn">保存</button><button type="button" class="hist-cancel-btn">キャンセル</button></div>' +
+            '</div>';
+        } else {
+          var color = ex ? exerciseColorVar(g.exerciseId) : "var(--text-muted)";
+          var name = ex ? ex.name : "（削除済み）";
+          html += '<div class="hist-entry" data-key="' + escapeHtml(key) + '">' +
+            '<div class="hist-entry-main"><span class="hist-entry-dot" style="background:' + color + '"></span>' +
+            '<span class="hist-entry-name">' + escapeHtml(name) + '</span>' +
+            '<span class="hist-entry-detail">' + g.weight + 'kg × ' + g.reps + '回 × ' + g.count + 'セット</span></div>' +
+            '<div class="hist-row-actions"><button type="button" class="hist-edit-btn" data-key="' + escapeHtml(key) + '">編集</button>' +
+            '<button type="button" class="hist-delete-btn" data-key="' + escapeHtml(key) + '">削除</button></div>' +
+            '</div>';
+        }
+      });
+      html += '</div></div>';
+    });
+    wrap.innerHTML = html + '</div>';
   }
   document.getElementById("histExerciseFilter").addEventListener("change", function () {
     historyEditingKey = null;
@@ -876,7 +931,7 @@
 
     var saveBtn = evt.target.closest ? evt.target.closest(".hist-save-btn") : null;
     if (saveBtn) {
-      var row = saveBtn.closest("tr");
+      var row = saveBtn.closest(".hist-entry-edit");
       var oldParts = row.getAttribute("data-key").split("|");
       var oldDate = oldParts[0], oldExId = oldParts[1], oldWeight = parseFloat(oldParts[2]), oldReps = parseFloat(oldParts[3]);
 
