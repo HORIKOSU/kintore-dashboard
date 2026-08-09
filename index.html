@@ -140,6 +140,13 @@
   .hist-entry-name { font-weight: 600; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
   .hist-entry-detail { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .hist-entry-edit { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--surface-1); border: 1px solid var(--series-1); border-radius: 8px; }
+  .menu-block { margin-bottom: 16px; }
+  .menu-block:last-of-type { margin-bottom: 8px; }
+  .menu-day-title { font-size: 13px; font-weight: 700; color: var(--series-1); margin: 0 0 8px; }
+  .menu-list { list-style: decimal; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .menu-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
+  .menu-ex-name { font-weight: 600; color: var(--text-primary); }
+  .menu-ex-detail { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
   .hist-edit-fields { display: flex; flex-wrap: wrap; gap: 10px; }
   .hist-edit-field { display: flex; flex-direction: column; gap: 3px; min-width: 110px; flex: 1 1 110px; }
   .hist-edit-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
@@ -156,6 +163,7 @@
     .hist-entry-main { width: 100%; }
     .hist-row-actions { width: 100%; justify-content: flex-end; }
     .hist-edit-field { flex: 1 1 100%; }
+    .menu-list li { flex-direction: column; align-items: flex-start; gap: 2px; }
   }
 </style>
 </head>
@@ -314,7 +322,28 @@
     <div class="card">
       <h2>登録済みの種目</h2>
       <div id="exerciseList"></div>
-      <p class="generated-note" style="margin-top:14px;">種目の追加・削除はClaudeとの会話でお伝えください。</p>
+      <p class="generated-note" style="margin-top:14px;">種目の追加はClaudeとの会話、または「記録を追加」タブの「新しい種目を登録」からできます。</p>
+    </div>
+
+    <div class="card">
+      <h2>おすすめトレーニングメニュー<span class="sub">肘・上腕（力こぶ〜二の腕）を鍛える週2回メニュー</span></h2>
+      <div class="menu-block">
+        <h3 class="menu-day-title">Day A：三頭筋メイン</h3>
+        <ol class="menu-list">
+          <li><span class="menu-ex-name">クローズグリップベンチプレス</span><span class="menu-ex-detail">3〜4セット × 8〜10回</span></li>
+          <li><span class="menu-ex-name">トライセプスエクステンション</span><span class="menu-ex-detail">3セット × 10〜12回</span></li>
+          <li><span class="menu-ex-name">ハンマーカール（補助）</span><span class="menu-ex-detail">2〜3セット × 10〜12回</span></li>
+        </ol>
+      </div>
+      <div class="menu-block">
+        <h3 class="menu-day-title">Day B：二頭筋メイン</h3>
+        <ol class="menu-list">
+          <li><span class="menu-ex-name">アームカール</span><span class="menu-ex-detail">3セット × 8〜12回</span></li>
+          <li><span class="menu-ex-name">ハンマーカール</span><span class="menu-ex-detail">3セット × 10〜12回</span></li>
+          <li><span class="menu-ex-name">トライセプスエクステンション（補助）</span><span class="menu-ex-detail">2〜3セット × 12〜15回</span></li>
+        </ol>
+      </div>
+      <p class="generated-note">週2回、中2〜3日空けて実施。上腕三頭筋は上腕全体の6〜7割を占めるとされるため、腕を太くしたい場合は三頭筋を軸に。重量は「最後の1〜2回がギリギリ挙がる」強度を目安に少しずつ増やす。</p>
     </div>
   </section>
 </main>
