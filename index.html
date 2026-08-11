@@ -59,6 +59,7 @@
   .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
   .stat-tile .value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .stat-tile .value.delta-up { color: var(--success); }
+  .stat-tile-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
   select { font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--baseline); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); }
   input[type="text"], input[type="number"], input[type="date"] { font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--baseline); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); width: 100%; box-sizing: border-box; }
   .filter-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; align-items: flex-end; }
@@ -154,6 +155,8 @@
   .body-diagram-svg { width: 100%; max-width: 420px; height: auto; }
   .body-diagram-title { font-size: 11px; font-weight: 700; fill: var(--text-secondary); }
   .body-diagram-label { font-size: 11px; font-weight: 700; fill: #fff; pointer-events: none; }
+  .body-diagram-label-sub { font-size: 8px; font-weight: 600; fill: #fff; opacity: 0.85; pointer-events: none; }
+  .body-diagram-label-vert { font-size: 7px; font-weight: 700; fill: #fff; pointer-events: none; }
   .bd-neutral { fill: var(--border); }
   .bd-shoulder { fill: var(--series-4); }
   .bd-chest { fill: var(--series-1); }
@@ -208,6 +211,11 @@
 
 <main>
   <section id="dashboard" class="panel active">
+    <div class="card">
+      <h2>現在のMAX<span class="sub">これまでの1回挙上（MAX）の自己ベスト</span></h2>
+      <div class="stat-row" id="maxStatRow"></div>
+    </div>
+
     <div class="card">
       <div class="toolbar-row">
         <h2>トレーニングカレンダー<span class="sub">筋トレをした日をハイライト表示</span></h2>
@@ -386,13 +394,19 @@
             <ellipse cx="44" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
             <ellipse cx="106" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
             <rect x="27" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <text x="35" y="102" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,35,102)">二頭筋</text>
             <rect x="107" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <text x="115" y="102" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,115,102)">二頭筋</text>
             <rect x="48" y="48" width="54" height="40" rx="10" class="bd-chest"></rect>
-            <text x="75" y="72" text-anchor="middle" class="body-diagram-label">胸</text>
+            <text x="75" y="68" text-anchor="middle" class="body-diagram-label">胸</text>
+            <text x="75" y="81" text-anchor="middle" class="body-diagram-label-sub">（大胸筋）</text>
             <rect x="52" y="86" width="46" height="42" rx="8" class="bd-core"></rect>
-            <text x="75" y="111" text-anchor="middle" class="body-diagram-label">体幹</text>
+            <text x="75" y="105" text-anchor="middle" class="body-diagram-label">体幹</text>
+            <text x="75" y="119" text-anchor="middle" class="body-diagram-label-sub">（腹直筋）</text>
             <rect x="54" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <text x="64" y="180" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,64,180)">大腿四頭筋（前もも）</text>
             <rect x="76" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <text x="86" y="180" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,86,180)">大腿四頭筋（前もも）</text>
             <rect x="68" y="34" width="14" height="10" class="bd-neutral"></rect>
             <circle cx="75" cy="22" r="18" class="bd-neutral"></circle>
           </g>
@@ -402,25 +416,34 @@
             <ellipse cx="44" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
             <ellipse cx="106" cy="54" rx="15" ry="13" class="bd-shoulder"></ellipse>
             <rect x="27" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <text x="35" y="102" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,35,102)">三頭筋</text>
             <rect x="107" y="54" width="16" height="96" rx="8" class="bd-arm"></rect>
+            <text x="115" y="102" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,115,102)">三頭筋</text>
             <rect x="48" y="48" width="54" height="80" rx="10" class="bd-back"></rect>
-            <text x="75" y="90" text-anchor="middle" class="body-diagram-label">背中</text>
-            <rect x="54" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
-            <rect x="76" y="126" width="20" height="108" rx="10" class="bd-leg"></rect>
+            <text x="75" y="84" text-anchor="middle" class="body-diagram-label">背中</text>
+            <text x="75" y="97" text-anchor="middle" class="body-diagram-label-sub">（広背筋・僧帽筋）</text>
+            <rect x="54" y="126" width="20" height="52" rx="8" class="bd-leg"></rect>
+            <text x="64" y="152" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,64,152)">ハムストリング</text>
+            <rect x="54" y="182" width="20" height="52" rx="8" class="bd-leg"></rect>
+            <text x="64" y="208" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,64,208)">ふくらはぎ</text>
+            <rect x="76" y="126" width="20" height="52" rx="8" class="bd-leg"></rect>
+            <text x="86" y="152" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,86,152)">ハムストリング</text>
+            <rect x="76" y="182" width="20" height="52" rx="8" class="bd-leg"></rect>
+            <text x="86" y="208" text-anchor="middle" class="body-diagram-label-vert" transform="rotate(-90,86,208)">ふくらはぎ</text>
             <rect x="68" y="34" width="14" height="10" class="bd-neutral"></rect>
             <circle cx="75" cy="22" r="18" class="bd-neutral"></circle>
           </g>
         </svg>
       </div>
       <div class="body-legend">
-        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-1)"></span>胸</div>
-        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-2)"></span>背中</div>
-        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-4)"></span>肩</div>
-        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-7)"></span>腕</div>
-        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-6)"></span>体幹（腹筋まわり）</div>
-        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-3)"></span>脚</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-1)"></span>胸（大胸筋）</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-2)"></span>背中（広背筋・僧帽筋）</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-4)"></span>肩（三角筋）</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-7)"></span>腕（正面：二頭筋／背面：三頭筋）</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-6)"></span>体幹（腹直筋まわり）</div>
+        <div class="body-legend-item"><span class="body-legend-dot" style="background:var(--series-3)"></span>脚（正面：大腿四頭筋／背面：ハムストリング・ふくらはぎ）</div>
       </div>
-      <p class="generated-note">腕・脚・肩は正面・背面どちらにも共通するため同じ色で表示しています（腕：力こぶ側と二の腕側、脚：前もも側と裏もも・ふくらはぎ側）。</p>
+      <p class="generated-note">腕・脚・肩は正面・背面どちらにも登場するため同じ色で表示しています。図の中の小さい文字は、その部位の中でも具体的にどの筋肉を指すか（例：腕の正面＝二頭筋、背面＝三頭筋）を示しています。</p>
     </div>
 
     <div class="card">
@@ -714,6 +737,31 @@
       '<div class="stat-tile"><div class="label">登録種目数</div><div class="value">' + state.exercises.length + ' 種目</div></div>';
   }
 
+  function renderMaxStatRow() {
+    var row = document.getElementById("maxStatRow");
+    if (!row) return;
+    var maxByExercise = {};
+    state.logs.forEach(function (l) {
+      if (l.reps !== 1) return;
+      if (!maxByExercise[l.exerciseId] || l.weight > maxByExercise[l.exerciseId].weight) {
+        maxByExercise[l.exerciseId] = { weight: l.weight, date: l.date };
+      }
+    });
+    var ordered = state.exercises.filter(function (ex) { return maxByExercise.hasOwnProperty(ex.id); });
+    if (ordered.length === 0) {
+      row.innerHTML = '<div class="empty-state">MAX（1回挙上）の記録がまだありません。「〇〇kg 1回」のように記録するとここに表示されます。</div>';
+      return;
+    }
+    var html = "";
+    ordered.forEach(function (ex) {
+      var m = maxByExercise[ex.id];
+      html += '<div class="stat-tile"><div class="label">' + escapeHtml(ex.name) + ' MAX</div>' +
+        '<div class="value">' + m.weight + 'kg</div>' +
+        '<div class="stat-tile-sub">' + escapeHtml(formatMonthDay(m.date)) + '時点</div></div>';
+    });
+    row.innerHTML = html;
+  }
+
   function renderFreqChart() {
     var filterId = document.getElementById("freqExerciseFilter").value;
     var months = last12Months();
@@ -925,6 +973,14 @@
     var presentMonths = months.filter(function (m) { return byMonthVolume[m] > 0; });
     var area = document.getElementById("volumeChartArea");
     var compareHtml = "";
+    var currentMonth = months[months.length - 1];
+    var avgMonths = presentMonths.filter(function (m) { return m !== currentMonth; });
+    var avgVol = avgMonths.length > 0
+      ? avgMonths.reduce(function (sum, m) { return sum + byMonthVolume[m]; }, 0) / avgMonths.length
+      : 0;
+    var avgTile = avgMonths.length > 0
+      ? '<div class="stat-tile"><div class="label">月平均' + metricLabel + '（当月除く）</div><div class="value">' + Math.round(avgVol).toLocaleString() + unit + '</div></div>'
+      : "";
     if (presentMonths.length >= 2) {
       var latestMonth = presentMonths[presentMonths.length - 1];
       var prevMonth = presentMonths[presentMonths.length - 2];
@@ -932,11 +988,12 @@
       var prevVol = byMonthVolume[prevMonth];
       var diff = latestVol - prevVol;
       var pct = prevVol ? (diff / prevVol * 100) : null;
-      var diffStr = (diff > 0 ? "+" : "") + diff.toLocaleString() + unit + (pct !== null ? "（" + (diff > 0 ? "+" : "") + pct.toFixed(0) + "%）" : "");
+      var diffStr = pct !== null ? (diff > 0 ? "+" : "") + pct.toFixed(0) + "%" : "-";
       compareHtml = '<div class="stat-row" style="margin-top:12px;">' +
         '<div class="stat-tile"><div class="label">' + monthLabel(prevMonth) + 'の' + metricLabel + '</div><div class="value">' + prevVol.toLocaleString() + unit + '</div></div>' +
         '<div class="stat-tile"><div class="label">' + monthLabel(latestMonth) + 'の' + metricLabel + '</div><div class="value">' + latestVol.toLocaleString() + unit + '</div></div>' +
-        '<div class="stat-tile"><div class="label">前月比</div><div class="value ' + (diff > 0 ? "delta-up" : "") + '">' + diffStr + '</div></div></div>';
+        '<div class="stat-tile"><div class="label">前月比</div><div class="value ' + (diff > 0 ? "delta-up" : "") + '">' + diffStr + '</div></div>' +
+        avgTile + '</div>';
     } else if (presentMonths.length === 1) {
       var onlyMonth = presentMonths[0];
       compareHtml = '<p class="generated-note" style="margin-top:8px;">' + monthLabel(onlyMonth) + 'の' + metricLabel + ' ' + byMonthVolume[onlyMonth].toLocaleString() + unit + 'のみ記録があります。比較できる前月のデータが増えると、ここに前月比が表示されます。</p>';
@@ -979,6 +1036,7 @@
 
   function renderDashboard() {
     renderStatRow();
+    renderMaxStatRow();
     populateFilterOptions(document.getElementById("freqExerciseFilter"), true);
     populateFilterOptions(document.getElementById("volumeExerciseFilter"), true, "ex01");
     populateFilterOptions(document.getElementById("weightExerciseFilter"), false);
