@@ -173,6 +173,8 @@
   .body-part-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
   .body-part-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
   .body-part-exercises { font-size: 13px; color: var(--text-secondary); padding-left: 18px; }
+  .body-part-empty { color: var(--text-muted); font-style: italic; }
+  .body-part-menu-note { font-size: 12px; color: var(--series-1); padding-left: 18px; margin-top: 3px; font-weight: 600; }
   .hist-edit-fields { display: flex; flex-wrap: wrap; gap: 10px; }
   .hist-edit-field { display: flex; flex-direction: column; gap: 3px; min-width: 110px; flex: 1 1 110px; }
   .hist-edit-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
@@ -447,7 +449,7 @@
     </div>
 
     <div class="card">
-      <h2>部位ごとの登録種目</h2>
+      <h2>筋肉部位ごとのメニュー<span class="sub">その部位を鍛えている登録種目（固定メニューがある部位は参照先も表示）</span></h2>
       <div id="bodyGuideExerciseList"></div>
     </div>
   </section>
@@ -509,6 +511,25 @@
   function categoryColorVar(category) {
     return CATEGORY_COLOR_MAP[category] || "var(--series-5)";
   }
+  // 部位ガイド用：カテゴリ内でも鍛えている筋肉が分かれる「腕」は種目名で判定し、
+  // それ以外のカテゴリはそのカテゴリの代表筋肉1つに割り当てる。
+  var MUSCLE_ORDER = ["大胸筋", "広背筋・僧帽筋", "三角筋", "二頭筋", "三頭筋", "前腕", "腹直筋", "大腿四頭筋", "ハムストリング", "ふくらはぎ"];
+  var MUSCLE_CATEGORY_MAP = { "大胸筋": "胸", "広背筋・僧帽筋": "背中", "三角筋": "肩", "二頭筋": "腕", "三頭筋": "腕", "前腕": "腕", "腹直筋": "体幹", "大腿四頭筋": "脚", "ハムストリング": "脚", "ふくらはぎ": "脚" };
+  var MUSCLE_MENU_NOTE = { "二頭筋": "「トレーニングメニュー」タブ・Day B（二頭筋メイン）", "三頭筋": "「トレーニングメニュー」タブ・Day A（三頭筋メイン）" };
+  function muscleForExercise(ex) {
+    if (ex.category === "腕") {
+      if (ex.name === "トライセプスエクステンション" || ex.name === "クローズグリップベンチプレス") return "三頭筋";
+      if (ex.name === "フィンガーカール") return "前腕";
+      if (ex.name === "アームカール" || ex.name === "ハンマーカール" || ex.name === "イージーバーカール") return "二頭筋";
+      return "二頭筋";
+    }
+    if (ex.category === "胸") return "大胸筋";
+    if (ex.category === "背中") return "広背筋・僧帽筋";
+    if (ex.category === "肩") return "三角筋";
+    if (ex.category === "体幹") return "腹直筋";
+    if (ex.category === "脚") return "大腿四頭筋";
+    return null;
+  }
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, function (c) {
       return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
@@ -563,20 +584,36 @@
     var wrap = document.getElementById("bodyGuideExerciseList");
     if (!wrap) return;
     if (state.exercises.length === 0) { wrap.innerHTML = '<div class="empty-state">まだ種目が登録されていません。</div>'; return; }
-    var byCategory = {};
+    var byMuscle = {};
+    var others = [];
     state.exercises.forEach(function (ex) {
-      var cat = ex.category || "その他";
-      if (!byCategory[cat]) byCategory[cat] = [];
-      byCategory[cat].push(ex.name);
+      var m = muscleForExercise(ex);
+      if (!m) { others.push(ex.name); return; }
+      if (!byMuscle[m]) byMuscle[m] = [];
+      byMuscle[m].push(ex.name);
     });
-    var cats = CATEGORY_ORDER.filter(function (c) { return byCategory[c]; });
-    Object.keys(byCategory).forEach(function (c) { if (cats.indexOf(c) === -1) cats.push(c); });
     var html = "";
-    cats.forEach(function (cat) {
+    MUSCLE_ORDER.forEach(function (m) {
+      var cat = MUSCLE_CATEGORY_MAP[m];
+      var exNames = byMuscle[m];
+      var menuNote = MUSCLE_MENU_NOTE[m];
       html += '<div class="body-part-group"><div class="body-part-heading"><span class="body-part-dot" style="background:' + categoryColorVar(cat) + '"></span>' +
-        '<span class="body-part-name">' + escapeHtml(cat) + '</span></div>' +
-        '<div class="body-part-exercises">' + byCategory[cat].map(escapeHtml).join("、") + '</div></div>';
+        '<span class="body-part-name">' + escapeHtml(m) + '</span></div>';
+      if (exNames && exNames.length > 0) {
+        html += '<div class="body-part-exercises">' + exNames.map(escapeHtml).join("、") + '</div>';
+      } else {
+        html += '<div class="body-part-exercises body-part-empty">この部位を鍛える種目はまだ登録されていません。</div>';
+      }
+      if (menuNote) {
+        html += '<div class="body-part-menu-note">固定メニュー：' + escapeHtml(menuNote) + '</div>';
+      }
+      html += '</div>';
     });
+    if (others.length > 0) {
+      html += '<div class="body-part-group"><div class="body-part-heading"><span class="body-part-dot" style="background:var(--series-5)"></span>' +
+        '<span class="body-part-name">その他</span></div>' +
+        '<div class="body-part-exercises">' + others.map(escapeHtml).join("、") + '</div></div>';
+    }
     wrap.innerHTML = html;
   }
 
