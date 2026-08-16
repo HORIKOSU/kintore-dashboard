@@ -679,7 +679,7 @@
     var trainedDateSet = {};
     state.logs.forEach(function (l) { trainedDateSet[l.date] = true; });
 
-    var todayStr = new Date().toISOString().slice(0, 10);
+    var todayStr = todayDateInputValue();
     var firstOfMonth = new Date(calState.year, calState.month, 1);
     var startWeekday = firstOfMonth.getDay();
     var daysInMonth = new Date(calState.year, calState.month + 1, 0).getDate();
@@ -759,7 +759,7 @@
   }
 
   function todayKey() {
-    if (state.logs.length === 0) return monthKey(new Date().toISOString().slice(0, 10));
+    if (state.logs.length === 0) return monthKey(todayDateInputValue());
     var latest = state.logs.map(function (l) { return l.date; }).sort().pop();
     return monthKey(latest);
   }
