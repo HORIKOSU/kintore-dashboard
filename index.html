@@ -278,6 +278,7 @@
   <section id="add" class="panel">
     <div class="card">
       <h2>記録を追加<span class="sub">その場でこのブラウザに保存されます（Claudeとの会話は不要）</span></h2>
+      <p class="generated-note" style="margin-top:-4px;margin-bottom:12px;">種目を選ぶと、その種目を前回記録したときの重量・回数・セット数が自動で入力されます。内容が同じ場合はそのまま「記録を追加」を押すだけでOKです。</p>
       <div class="filter-row">
         <div class="filter-item"><label class="field-label">種目</label>
           <select id="addExercise"></select>
@@ -1306,6 +1307,41 @@
     return "log_" + Date.now().toString(16) + Math.random().toString(16).slice(2, 8);
   }
 
+  // その種目を最後に記録したときの重量・回数・セット数を返す（前回と同じ内容を入力しやすくするため）。
+  // 同じ日に重量・回数の異なる記録が複数あっても、一番最後に登録した組み合わせを優先する。
+  function lastLogGroupForExercise(exId) {
+    var logsForEx = state.logs.filter(function (l) { return l.exerciseId === exId; });
+    if (logsForEx.length === 0) return null;
+    var latest = logsForEx.reduce(function (best, l) {
+      if (!best) return l;
+      if (l.date > best.date) return l;
+      if (l.date === best.date && l.setNumber > best.setNumber) return l;
+      return best;
+    }, null);
+    var sameGroup = logsForEx.filter(function (l) {
+      return l.date === latest.date && l.weight === latest.weight && l.reps === latest.reps;
+    });
+    return { weight: latest.weight, reps: latest.reps, sets: sameGroup.length };
+  }
+
+  function prefillAddFormFromLastLog(exId, force) {
+    var weightEl = document.getElementById("addWeight");
+    var repsEl = document.getElementById("addReps");
+    var setsEl = document.getElementById("addSets");
+    if (!force && (weightEl.value || repsEl.value)) return;
+    var g = exId ? lastLogGroupForExercise(exId) : null;
+    if (g) {
+      weightEl.value = g.weight;
+      repsEl.value = g.reps;
+      setsEl.value = g.sets;
+    } else if (force) {
+      // 記録のない種目に切り替えたときは、前の種目の値を残さず空にする
+      weightEl.value = "";
+      repsEl.value = "";
+      setsEl.value = "1";
+    }
+  }
+
   function populateAddExerciseSelect() {
     var sel = document.getElementById("addExercise");
     var prev = sel.value;
@@ -1326,7 +1362,12 @@
     if (prev && exerciseById(prev)) sel.value = prev;
     var dateEl = document.getElementById("addDate");
     if (!dateEl.value) dateEl.value = todayDateInputValue();
+    prefillAddFormFromLastLog(sel.value, false);
   }
+
+  document.getElementById("addExercise").addEventListener("change", function () {
+    prefillAddFormFromLastLog(this.value, true);
+  });
 
   document.getElementById("addSubmitBtn").addEventListener("click", function () {
     var statusEl = document.getElementById("addStatus");
@@ -1378,11 +1419,8 @@
 
     persistState();
     var ex = exerciseById(exId);
-    statusEl.textContent = (ex ? ex.name : "") + " " + weight + "kg×" + reps + "回×" + sets + "セットを追加しました（このブラウザに保存済み）。";
+    statusEl.textContent = (ex ? ex.name : "") + " " + weight + "kg×" + reps + "回×" + sets + "セットを追加しました（このブラウザに保存済み）。同じ内容をもう一度追加する場合は、そのまま「記録を追加」を押してください。";
     statusEl.className = "data-io-status success";
-    document.getElementById("addWeight").value = "";
-    document.getElementById("addReps").value = "";
-    document.getElementById("addSets").value = "1";
     renderAll();
   });
 
