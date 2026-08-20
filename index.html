@@ -175,6 +175,7 @@
   .body-part-exercises { font-size: 13px; color: var(--text-secondary); padding-left: 18px; }
   .body-part-empty { color: var(--text-muted); font-style: italic; }
   .body-part-menu-note { font-size: 12px; color: var(--series-1); padding-left: 18px; margin-top: 3px; font-weight: 600; }
+  .volume-motivate { margin-top: 8px; margin-bottom: 0; font-size: 15px; font-weight: 800; color: #eb6834; }
   .hist-edit-fields { display: flex; flex-wrap: wrap; gap: 10px; }
   .hist-edit-field { display: flex; flex-direction: column; gap: 3px; min-width: 110px; flex: 1 1 110px; }
   .hist-edit-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
@@ -193,9 +194,38 @@
     .hist-edit-field { flex: 1 1 100%; }
     .menu-list li { flex-direction: column; align-items: flex-start; gap: 2px; }
   }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(20px);
+    max-width: min(92vw, 420px);
+    background: var(--success, #2f9e59);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.toast-error {
+    background: var(--danger, #c0392b);
+  }
 </style>
 </head>
 <body class="viz-root">
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <header class="app-header">
   <h1>🏋️ 筋トレ記録ダッシュボード</h1>
@@ -484,6 +514,18 @@
 
   function persistState() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); usingLocalData = true; } catch (e) {}
+  }
+
+  var toastTimer = null;
+  function showToast(message, isError) {
+    var el = document.getElementById("toast");
+    if (!el) return;
+    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+    el.textContent = message;
+    el.className = "toast show" + (isError ? " toast-error" : "");
+    toastTimer = setTimeout(function () {
+      el.className = "toast";
+    }, 3200);
   }
 
   function updateDataStatusLine() {
@@ -1032,12 +1074,42 @@
         '<div class="stat-tile"><div class="label">' + monthLabel(latestMonth) + 'の' + metricLabel + '</div><div class="value">' + latestVol.toLocaleString() + unit + '</div></div>' +
         '<div class="stat-tile"><div class="label">前月比</div><div class="value ' + (diff > 0 ? "delta-up" : "") + '">' + diffStr + '</div></div>' +
         avgTile + '</div>';
+
+      // 前月に追いついていない場合、直近のメニュー（重量×回数）を基準に
+      // 「あと何セット追加すれば前月と同程度になるか」を目安として表示する。
+      var deficit = prevVol - latestVol;
+      if (deficit > 0) {
+        var targetExId = filterId !== "__all__" ? filterId : null;
+        if (!targetExId) {
+          var sortedRecent = state.logs.slice().sort(function (a, b) {
+            if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+            return b.setNumber - a.setNumber;
+          });
+          for (var ri = 0; ri < sortedRecent.length; ri++) {
+            if (sortedRecent[ri].weight > 0) { targetExId = sortedRecent[ri].exerciseId; break; }
+          }
+        }
+        if (targetExId) {
+          var g = lastLogGroupForExercise(targetExId);
+          var targetEx = exerciseById(targetExId);
+          if (g && targetEx) {
+            var perSet = isBodyweight ? g.reps : (g.weight * g.reps);
+            if (perSet > 0) {
+              var neededSets = Math.ceil(deficit / perSet);
+              var neededStr = isBodyweight
+                ? targetEx.name + " " + g.reps + "回"
+                : targetEx.name + " " + g.weight + "kg×" + g.reps + "回";
+              compareHtml += '<p class="volume-motivate">あと' + Math.round(deficit).toLocaleString() + unit + '！' + neededStr + 'を' + neededSets + 'セット追加でいけます🔥</p>';
+            }
+          }
+        }
+      }
     } else if (presentMonths.length === 1) {
       var onlyMonth = presentMonths[0];
       compareHtml = '<p class="generated-note" style="margin-top:8px;">' + monthLabel(onlyMonth) + 'の' + metricLabel + ' ' + byMonthVolume[onlyMonth].toLocaleString() + unit + 'のみ記録があります。比較できる前月のデータが増えると、ここに前月比が表示されます。</p>';
     }
-    var existingCompare = area.querySelector(".stat-row, .generated-note");
-    if (existingCompare) existingCompare.remove();
+    var existingCompare = area.querySelectorAll(".stat-row, .generated-note, .volume-motivate");
+    existingCompare.forEach(function (el) { el.remove(); });
     var detailsEl = area.querySelector("details.table-toggle");
     detailsEl.insertAdjacentHTML("beforebegin", compareHtml);
 
@@ -1419,8 +1491,10 @@
 
     persistState();
     var ex = exerciseById(exId);
-    statusEl.textContent = (ex ? ex.name : "") + " " + weight + "kg×" + reps + "回×" + sets + "セットを追加しました（このブラウザに保存済み）。同じ内容をもう一度追加する場合は、そのまま「記録を追加」を押してください。";
+    var summaryText = (ex ? ex.name : "") + " " + weight + "kg×" + reps + "回×" + sets + "セット";
+    statusEl.textContent = summaryText + "を追加しました（このブラウザに保存済み）。同じ内容をもう一度追加する場合は、そのまま「記録を追加」を押してください。";
     statusEl.className = "data-io-status success";
+    showToast("✅ 追加しました：" + summaryText + "（" + date + "）");
     renderAll();
   });
 
