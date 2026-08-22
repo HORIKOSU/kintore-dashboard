@@ -1290,7 +1290,7 @@
         } else {
           var color = ex ? exerciseColorVar(g.exerciseId) : "var(--text-muted)";
           var name = ex ? ex.name : "（削除済み）";
-          html += '<div class="hist-entry" data-key="' + escapeHtml(key) + '" style="border-left:4px solid ' + color + ';">' +
+          html += '<div class="hist-entry" data-key="' + escapeHtml(key) + '">' +
             '<div class="hist-entry-main"><span class="hist-entry-dot" style="background:' + color + '"></span>' +
             '<span class="hist-entry-name">' + escapeHtml(name) + '</span>' +
             '<span class="hist-entry-detail">' + g.weight + 'kg × ' + g.reps + '回 × ' + g.count + 'セット</span></div>' +
