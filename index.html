@@ -1150,12 +1150,14 @@
           var g = lastLogGroupForExercise(targetExId);
           var targetEx = exerciseById(targetExId);
           if (g && targetEx) {
-            var perSet = isBodyweight ? g.reps : (g.weight * g.reps);
+            // メニュー提案は基本的に「10回1セット」を基準にする（2026-08-20、ユーザー指定の前提）。
+            var assumedReps = 10;
+            var perSet = isBodyweight ? assumedReps : (g.weight * assumedReps);
             if (perSet > 0) {
               var neededSets = Math.ceil(deficit / perSet);
               var neededStr = isBodyweight
-                ? targetEx.name + " " + g.reps + "回"
-                : targetEx.name + " " + g.weight + "kg×" + g.reps + "回";
+                ? targetEx.name + " " + assumedReps + "回"
+                : targetEx.name + " " + g.weight + "kg×" + assumedReps + "回";
               compareHtml += '<p class="volume-motivate">あと' + Math.round(deficit).toLocaleString() + unit + '！' + neededStr + 'を' + neededSets + 'セット追加でいけます🔥</p>';
             }
           }
