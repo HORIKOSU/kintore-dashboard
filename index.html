@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-09-08T13:48:37Z -->
+<!-- build: 2026-09-11T00:26:31Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -130,6 +130,9 @@
   .cal-view-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
   .cal-view-btn { appearance: none; border: 1px solid var(--border); background: var(--page-plane); color: var(--text-secondary); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; }
   .cal-view-btn.active { background: var(--surface-dark); color: var(--text-on-dark); border-color: var(--surface-dark); }
+  .ex-tab-scroll { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; -webkit-overflow-scrolling: touch; }
+  .ex-tab-btn { appearance: none; border: 1px solid var(--border); background: var(--page-plane); color: var(--text-secondary); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; white-space: nowrap; flex: none; }
+  .ex-tab-btn.active { background: var(--surface-dark); color: var(--text-on-dark); border-color: var(--surface-dark); }
   .cal-weekdays { display: none; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
   .cal-grid { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
   .cal-day { position: relative; flex: 0 0 54px; height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 16px; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--text-secondary); background: var(--page-plane); overflow: hidden; scroll-snap-align: center; }
@@ -351,8 +354,8 @@
     <div class="card">
       <div class="toolbar-row"><h2>月間の総重量<span class="sub" id="volumeSubLabel">直近12か月・重量×回数の合計（トレーニングボリューム）</span></h2></div>
       <div class="filter-row">
-        <div class="filter-item"><label class="field-label">種目</label>
-          <select id="volumeExerciseFilter"><option value="__all__">全種目</option></select>
+        <div class="filter-item" style="flex:1 1 100%;"><label class="field-label">種目</label>
+          <div id="volumeExerciseTabs" class="ex-tab-scroll"></div>
         </div>
       </div>
       <div id="volumeChartArea">
@@ -563,7 +566,7 @@
 (function () {
   "use strict";
 
-  var EMBEDDED_STATE = {"exercises": [], "logs": []};
+  var EMBEDDED_STATE = {"exercises":[],"logs":[]};
   var STORAGE_KEY = "kintoreTrackerData_v1";
   var usingLocalData = false;
 
@@ -732,6 +735,30 @@
     }
     wrap.innerHTML = html;
   }
+
+  // ---- 月間の総重量：種目タブ（2026-09-11、プルダウン→タブ切り替えに変更。過去に記録がある種目のみ表示） ----
+  var volumeFilterId = "__all__";
+
+  function renderVolumeExerciseTabs() {
+    var usedIds = {};
+    state.logs.forEach(function (l) { usedIds[l.exerciseId] = true; });
+    var usedExercises = state.exercises.filter(function (ex) { return usedIds[ex.id]; });
+    if (volumeFilterId !== "__all__" && !usedIds[volumeFilterId]) volumeFilterId = "__all__";
+    var html = '<button type="button" class="ex-tab-btn' + (volumeFilterId === "__all__" ? " active" : "") + '" data-ex="__all__">全種目</button>';
+    usedExercises.forEach(function (ex) {
+      html += '<button type="button" class="ex-tab-btn' + (volumeFilterId === ex.id ? " active" : "") + '" data-ex="' + ex.id + '">' + escapeHtml(ex.name) + '</button>';
+    });
+    document.getElementById("volumeExerciseTabs").innerHTML = html;
+  }
+
+  document.getElementById("volumeExerciseTabs").addEventListener("click", function (e) {
+    var btn = e.target.closest(".ex-tab-btn");
+    if (!btn) return;
+    if (btn.dataset.ex === volumeFilterId) return;
+    volumeFilterId = btn.dataset.ex;
+    renderVolumeExerciseTabs();
+    renderVolumeChart();
+  });
 
   // ---- calendar ----
   var calState = null;
@@ -1114,7 +1141,7 @@
   }
 
   function renderVolumeChart() {
-    var filterId = document.getElementById("volumeExerciseFilter").value;
+    var filterId = volumeFilterId;
     var months = last12Months();
     var logsInScope = state.logs.filter(function (l) { return filterId === "__all__" || l.exerciseId === filterId; });
 
@@ -1294,14 +1321,13 @@
     renderHeroCard();
     renderMaxStatRow();
     populateFilterOptions(document.getElementById("freqExerciseFilter"), true);
-    populateFilterOptions(document.getElementById("volumeExerciseFilter"), true, "ex01");
     populateFilterOptions(document.getElementById("weightExerciseFilter"), false);
     renderFreqChart();
+    renderVolumeExerciseTabs();
     renderVolumeChart();
     renderWeightChart();
   }
   document.getElementById("freqExerciseFilter").addEventListener("change", renderFreqChart);
-  document.getElementById("volumeExerciseFilter").addEventListener("change", renderVolumeChart);
   document.getElementById("weightExerciseFilter").addEventListener("change", renderWeightChart);
   document.getElementById("weightYearFilter").addEventListener("change", renderWeightChart);
 
@@ -1560,6 +1586,21 @@
     }
   }
 
+  // 直近30日の記録回数が多い種目ほど上に来るよう並び替える（同数の場合は元の登録順を維持）。
+  function recentUsageSortedExercises() {
+    var cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    var cutoffStr = cutoff.getFullYear() + "-" + pad2(cutoff.getMonth() + 1) + "-" + pad2(cutoff.getDate());
+    var recentCount = {};
+    state.logs.forEach(function (l) {
+      if (l.date >= cutoffStr) recentCount[l.exerciseId] = (recentCount[l.exerciseId] || 0) + 1;
+    });
+    return state.exercises
+      .map(function (ex, idx) { return { ex: ex, idx: idx, count: recentCount[ex.id] || 0 }; })
+      .sort(function (a, b) { return b.count - a.count || a.idx - b.idx; })
+      .map(function (item) { return item.ex; });
+  }
+
   function populateAddExerciseSelect() {
     var sel = document.getElementById("addExercise");
     var prev = sel.value;
@@ -1571,7 +1612,7 @@
       sel.appendChild(opt);
       return;
     }
-    state.exercises.forEach(function (ex) {
+    recentUsageSortedExercises().forEach(function (ex) {
       var o = document.createElement("option");
       o.value = ex.id;
       o.textContent = ex.name;
