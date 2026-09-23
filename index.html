@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-09-11T00:26:31Z -->
+<!-- build: 2026-09-23T00:36:19Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -736,16 +736,21 @@
     wrap.innerHTML = html;
   }
 
-  // ---- 月間の総重量：種目タブ（2026-09-11、プルダウン→タブ切り替えに変更。過去に記録がある種目のみ表示） ----
+  // ---- 月間の総重量：種目タブ（2026-09-11、プルダウン→タブ切り替えに変更。2026-09-23、対象を固定4種目に変更） ----
   var volumeFilterId = "__all__";
+  // 表示する種目を固定リストに限定（2026-09-23、「下記のみで」との要望。以前は記録がある種目を自動抽出していたが、
+  // 特定の4種目だけに絞りたいとの要望を受け、記録の有無に関わらずこの名前の種目だけを常に表示する方式に変更）。
+  var VOLUME_TAB_EXERCISE_NAMES = ["ベンチプレス", "アームカール", "フィンガーカール", "腹筋"];
 
   function renderVolumeExerciseTabs() {
-    var usedIds = {};
-    state.logs.forEach(function (l) { usedIds[l.exerciseId] = true; });
-    var usedExercises = state.exercises.filter(function (ex) { return usedIds[ex.id]; });
-    if (volumeFilterId !== "__all__" && !usedIds[volumeFilterId]) volumeFilterId = "__all__";
+    var tabExercises = VOLUME_TAB_EXERCISE_NAMES
+      .map(function (name) { return state.exercises.filter(function (ex) { return ex.name === name; })[0]; })
+      .filter(function (ex) { return !!ex; });
+    var validIds = { "__all__": true };
+    tabExercises.forEach(function (ex) { validIds[ex.id] = true; });
+    if (!validIds[volumeFilterId]) volumeFilterId = "__all__";
     var html = '<button type="button" class="ex-tab-btn' + (volumeFilterId === "__all__" ? " active" : "") + '" data-ex="__all__">全種目</button>';
-    usedExercises.forEach(function (ex) {
+    tabExercises.forEach(function (ex) {
       html += '<button type="button" class="ex-tab-btn' + (volumeFilterId === ex.id ? " active" : "") + '" data-ex="' + ex.id + '">' + escapeHtml(ex.name) + '</button>';
     });
     document.getElementById("volumeExerciseTabs").innerHTML = html;
