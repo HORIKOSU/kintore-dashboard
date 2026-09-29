@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-09-23T00:52:14Z -->
+<!-- build: 2026-09-29T23:45:47Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -1003,6 +1003,54 @@
     row.innerHTML = html;
   }
 
+  // 棒グラフ（月間トレーニング回数／月間の総重量）の各バーの上に数値を表示する軽量プラグイン（2026-09-29追加。
+  // 「重量の推移」グラフの数値ラベルと同じ考え方で、外部ライブラリを使わずChart.jsのプラグインAPIで直接描画する）。
+  // 値が0の月は表示が煩雑になるためラベルを出さない。
+  var BAR_VALUE_LABEL_FONT_SIZES = [11, 10, 9];
+  function barValueLabelFont(px) {
+    return "700 " + px + "px -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif";
+  }
+  var BAR_VALUE_LABEL_PLUGIN = {
+    id: "barValueLabels",
+    afterDatasetsDraw: function (chart) {
+      var ctx = chart.ctx;
+      chart.data.datasets.forEach(function (dataset, datasetIndex) {
+        var meta = chart.getDatasetMeta(datasetIndex);
+        if (meta.hidden) return;
+        // 隣り合うバーのラベル同士が重ならないよう、左から順に「直前のラベルの右端」を記録しておき、
+        // 収まらない場合はフォントを縮小→それでも重なる場合はそのラベルを省略する（文字が潰れて読めなくなるより良い）
+        var lastRightEdge = -Infinity;
+        var minGap = 3;
+        meta.data.forEach(function (bar, index) {
+          var value = dataset.data[index];
+          if (!value) return;
+          var unit = dataset.valueLabelUnit || "";
+          var text = (typeof value === "number" ? value.toLocaleString() : String(value)) + unit;
+          var chosenFont = null, textWidth = null;
+          for (var fi = 0; fi < BAR_VALUE_LABEL_FONT_SIZES.length; fi++) {
+            ctx.font = barValueLabelFont(BAR_VALUE_LABEL_FONT_SIZES[fi]);
+            var w = ctx.measureText(text).width;
+            var left = bar.x - w / 2;
+            if (left >= lastRightEdge + minGap) {
+              chosenFont = BAR_VALUE_LABEL_FONT_SIZES[fi];
+              textWidth = w;
+              break;
+            }
+          }
+          if (!chosenFont) return; // どのフォントサイズでも直前のラベルと重なる場合は表示を省略する
+          ctx.save();
+          ctx.font = barValueLabelFont(chosenFont);
+          ctx.fillStyle = "#52514e";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(text, bar.x, bar.y - 6);
+          ctx.restore();
+          lastRightEdge = bar.x + textWidth / 2;
+        });
+      });
+    }
+  };
+
   function renderFreqChart() {
     var filterId = document.getElementById("freqExerciseFilter").value;
     var months = last12Months();
@@ -1017,13 +1065,15 @@
     if (freqChartInstance) freqChartInstance.destroy();
     freqChartInstance = new Chart(ctx, {
       type: "bar",
-      data: { labels: labels, datasets: [{ label: "トレーニング回数", data: counts, backgroundColor: "#2a78d6", borderRadius: 4, maxBarThickness: 28 }] },
+      data: { labels: labels, datasets: [{ label: "トレーニング回数", data: counts, backgroundColor: "#2a78d6", borderRadius: 4, maxBarThickness: 28, valueLabelUnit: "回" }] },
+      plugins: [BAR_VALUE_LABEL_PLUGIN],
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 18 } },
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (item) { return item.parsed.y + " 回"; } } } },
         scales: {
           x: { grid: { display: false }, ticks: { color: "#898781", font: { size: 11 } } },
-          y: { beginAtZero: true, ticks: { precision: 0, color: "#898781", font: { size: 11 } }, grid: { color: "#e1e0d9" } }
+          y: { beginAtZero: true, grace: "10%", ticks: { precision: 0, color: "#898781", font: { size: 11 } }, grid: { color: "#e1e0d9" } }
         }
       }
     });
@@ -1033,6 +1083,32 @@
     labels.forEach(function (l, i) { html += "<tr><td>" + l + "</td><td class='num'>" + counts[i] + "</td></tr>"; });
     tableWrap.innerHTML = html + "</tbody></table>";
   }
+
+  // 「重量の推移」グラフの各点に数値を表示するための軽量プラグイン（2026-09-29追加。外部ライブラリは使わず、
+  // Chart.jsのプラグインAPI（afterDatasetsDraw）で直接描画する）。系列が2本（10回1セット／MAX）重なって
+  // 見づらくならないよう、データセットのインデックスの偶奇で上下に振り分けている。
+  var WEIGHT_VALUE_LABEL_PLUGIN = {
+    id: "weightValueLabels",
+    afterDatasetsDraw: function (chart) {
+      var ctx = chart.ctx;
+      chart.data.datasets.forEach(function (dataset, datasetIndex) {
+        var meta = chart.getDatasetMeta(datasetIndex);
+        if (meta.hidden) return;
+        var above = datasetIndex % 2 === 0;
+        meta.data.forEach(function (point, index) {
+          var value = dataset.data[index];
+          if (value === null || value === undefined) return;
+          ctx.save();
+          ctx.font = "700 11px -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif";
+          ctx.fillStyle = dataset.borderColor || "#52514e";
+          ctx.textAlign = "center";
+          ctx.textBaseline = above ? "bottom" : "top";
+          ctx.fillText(String(value), point.x, point.y + (above ? -8 : 8));
+          ctx.restore();
+        });
+      });
+    }
+  };
 
   function renderWeightChart() {
     var exerciseId = document.getElementById("weightExerciseFilter").value;
@@ -1108,8 +1184,10 @@
     weightChartInstance = new Chart(ctx, {
       type: "line",
       data: { labels: chartLabels, datasets: datasets },
+      plugins: [WEIGHT_VALUE_LABEL_PLUGIN],
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 18, bottom: 6 } },
         plugins: {
           legend: { display: datasets.length > 1, position: "top", labels: { color: "#52514e", font: { size: 11 }, boxWidth: 16 } },
           tooltip: {
@@ -1121,7 +1199,7 @@
         },
         scales: {
           x: { grid: { display: false }, ticks: { color: "#898781", font: { size: 11 } } },
-          y: { beginAtZero: true, ticks: { color: "#898781", font: { size: 11 } }, grid: { color: "#e1e0d9" }, title: { display: true, text: "kg", color: "#898781" } }
+          y: { beginAtZero: true, grace: "10%", ticks: { color: "#898781", font: { size: 11 } }, grid: { color: "#e1e0d9" }, title: { display: true, text: "kg", color: "#898781" } }
         }
       }
     });
@@ -1191,13 +1269,15 @@
     if (volumeChartInstance) volumeChartInstance.destroy();
     volumeChartInstance = new Chart(ctx, {
       type: "bar",
-      data: { labels: labels, datasets: [{ label: metricLabel + "(" + unit + ")", data: volumes, backgroundColor: "#eb6834", borderRadius: 4, maxBarThickness: 28 }] },
+      data: { labels: labels, datasets: [{ label: metricLabel + "(" + unit + ")", data: volumes, backgroundColor: "#eb6834", borderRadius: 4, maxBarThickness: 28, valueLabelUnit: unit }] },
+      plugins: [BAR_VALUE_LABEL_PLUGIN],
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 18 } },
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (item) { return item.parsed.y.toLocaleString() + " " + unit; } } } },
         scales: {
           x: { grid: { display: false }, ticks: { color: "#898781", font: { size: 11 } } },
-          y: { beginAtZero: true, ticks: { color: "#898781", font: { size: 11 } }, grid: { color: "#e1e0d9" } }
+          y: { beginAtZero: true, grace: "10%", ticks: { color: "#898781", font: { size: 11 } }, grid: { color: "#e1e0d9" } }
         }
       }
     });
