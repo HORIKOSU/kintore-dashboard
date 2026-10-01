@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-09-29T23:45:47Z -->
+<!-- build: 2026-09-30T12:13:52Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -1003,9 +1003,17 @@
     row.innerHTML = html;
   }
 
-  // 棒グラフ（月間トレーニング回数／月間の総重量）の各バーの上に数値を表示する軽量プラグイン（2026-09-29追加。
-  // 「重量の推移」グラフの数値ラベルと同じ考え方で、外部ライブラリを使わずChart.jsのプラグインAPIで直接描画する）。
+  // 棒グラフ（月間トレーニング回数／月間の総重量）の各バーの上に数値を表示する軽量プラグイン（2026-09-29追加、
+  // 2026-09-30に「数字が表示されない／重なる」不具合を修正）。
+  // 「重量の推移」グラフの数値ラベルと同じ考え方で、外部ライブラリを使わずChart.jsのプラグインAPIで直接描画する。
   // 値が0の月は表示が煩雑になるためラベルを出さない。
+  // 各バーが使える表示幅は「隣のバーとの間隔（カテゴリ幅）」を基準に、そのバー単独で判定する（直前のバーが
+  // 何を描画したかには依存させない）。これは、以前「直前に描画したラベルの右端」を記録して衝突判定する方式で
+  // 実装していたところ、横に幅の広いラベルが1つあると次のバーのラベルが連鎖的に非表示になってしまい、
+  // 特に直近月（一番右のバー）の数値が表示されない不具合につながっていたための修正。
+  // 収まらない場合はフォントを縮小し、それでも収まらない場合は「34.4k」のような省略表記にする。
+  // どうしても収まらない場合でも、ラベル自体を非表示にはせず（＝数値が消えることは避け）、
+  // 最も省略した表記を最小フォントで表示する（多少隣と近づいても、数字が見えない方が問題であるため）。
   var BAR_VALUE_LABEL_FONT_SIZES = [11, 10, 9];
   function barValueLabelFont(px) {
     return "700 " + px + "px -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif";
@@ -1017,35 +1025,39 @@
       chart.data.datasets.forEach(function (dataset, datasetIndex) {
         var meta = chart.getDatasetMeta(datasetIndex);
         if (meta.hidden) return;
-        // 隣り合うバーのラベル同士が重ならないよう、左から順に「直前のラベルの右端」を記録しておき、
-        // 収まらない場合はフォントを縮小→それでも重なる場合はそのラベルを省略する（文字が潰れて読めなくなるより良い）
-        var lastRightEdge = -Infinity;
-        var minGap = 3;
+        var categoryWidth = meta.data.length > 1 ? Math.abs(meta.data[1].x - meta.data[0].x) : chart.width;
+        var maxWidth = Math.max(categoryWidth - 4, 14);
         meta.data.forEach(function (bar, index) {
           var value = dataset.data[index];
           if (!value) return;
           var unit = dataset.valueLabelUnit || "";
-          var text = (typeof value === "number" ? value.toLocaleString() : String(value)) + unit;
-          var chosenFont = null, textWidth = null;
-          for (var fi = 0; fi < BAR_VALUE_LABEL_FONT_SIZES.length; fi++) {
-            ctx.font = barValueLabelFont(BAR_VALUE_LABEL_FONT_SIZES[fi]);
-            var w = ctx.measureText(text).width;
-            var left = bar.x - w / 2;
-            if (left >= lastRightEdge + minGap) {
-              chosenFont = BAR_VALUE_LABEL_FONT_SIZES[fi];
-              textWidth = w;
-              break;
+          var fullText = (typeof value === "number" ? value.toLocaleString() : String(value)) + unit;
+          var candidates = [fullText];
+          if (typeof value === "number" && value >= 1000) {
+            candidates.push((Math.round(value / 100) / 10) + "k");
+          }
+          var chosenText = null, chosenFont = null;
+          for (var ci = 0; ci < candidates.length && !chosenText; ci++) {
+            for (var fi = 0; fi < BAR_VALUE_LABEL_FONT_SIZES.length; fi++) {
+              ctx.font = barValueLabelFont(BAR_VALUE_LABEL_FONT_SIZES[fi]);
+              if (ctx.measureText(candidates[ci]).width <= maxWidth) {
+                chosenText = candidates[ci];
+                chosenFont = BAR_VALUE_LABEL_FONT_SIZES[fi];
+                break;
+              }
             }
           }
-          if (!chosenFont) return; // どのフォントサイズでも直前のラベルと重なる場合は表示を省略する
+          if (!chosenText) {
+            chosenText = candidates[candidates.length - 1];
+            chosenFont = BAR_VALUE_LABEL_FONT_SIZES[BAR_VALUE_LABEL_FONT_SIZES.length - 1];
+          }
           ctx.save();
           ctx.font = barValueLabelFont(chosenFont);
           ctx.fillStyle = "#52514e";
           ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
-          ctx.fillText(text, bar.x, bar.y - 6);
+          ctx.fillText(chosenText, bar.x, bar.y - 6);
           ctx.restore();
-          lastRightEdge = bar.x + textWidth / 2;
         });
       });
     }
@@ -1084,29 +1096,62 @@
     tableWrap.innerHTML = html + "</tbody></table>";
   }
 
-  // 「重量の推移」グラフの各点に数値を表示するための軽量プラグイン（2026-09-29追加。外部ライブラリは使わず、
-  // Chart.jsのプラグインAPI（afterDatasetsDraw）で直接描画する）。系列が2本（10回1セット／MAX）重なって
-  // 見づらくならないよう、データセットのインデックスの偶奇で上下に振り分けている。
+  // 「重量の推移」グラフの各点に数値を表示するための軽量プラグイン（2026-09-29追加、2026-09-30に重なり修正。
+  // 外部ライブラリは使わず、Chart.jsのプラグインAPI（afterDatasetsDraw）で直接描画する）。
+  // 系列が2本（10回1セット／MAX）ある場合、同じ月の2点の実際の画面上の高さ（ピクセル距離）を見て、
+  // 近すぎる場合はラベル同士がぶつからないよう上下に押し広げる（固定8pxオフセットだけだと、
+  // 2系列の値が近い月でラベルが重なって読めなくなっていたため修正）。
+  var WEIGHT_VALUE_LABEL_MIN_GAP = 22;
+  var WEIGHT_VALUE_LABEL_BASE_OFFSET = 8;
   var WEIGHT_VALUE_LABEL_PLUGIN = {
     id: "weightValueLabels",
     afterDatasetsDraw: function (chart) {
       var ctx = chart.ctx;
+      var visible = [];
       chart.data.datasets.forEach(function (dataset, datasetIndex) {
         var meta = chart.getDatasetMeta(datasetIndex);
-        if (meta.hidden) return;
-        var above = datasetIndex % 2 === 0;
-        meta.data.forEach(function (point, index) {
-          var value = dataset.data[index];
+        if (!meta.hidden) visible.push({ dataset: dataset, meta: meta });
+      });
+      if (visible.length === 0) return;
+      var pointCount = visible[0].meta.data.length;
+      ctx.font = "700 11px -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif";
+      for (var index = 0; index < pointCount; index++) {
+        // この月（インデックス）に存在する系列の点を集め、画面上の高さ（yが小さいほど上）でソートする
+        var entries = [];
+        visible.forEach(function (vd) {
+          var value = vd.dataset.data[index];
           if (value === null || value === undefined) return;
+          entries.push({ value: value, point: vd.meta.data[index], color: vd.dataset.borderColor || "#52514e" });
+        });
+        if (entries.length === 0) continue;
+        entries.sort(function (a, b) { return a.point.y - b.point.y; });
+        var topEntry = entries[0];
+        var bottomEntry = entries[entries.length - 1];
+        var visualGap = bottomEntry.point.y - topEntry.point.y;
+        var extraPush = visualGap < WEIGHT_VALUE_LABEL_MIN_GAP ? (WEIGHT_VALUE_LABEL_MIN_GAP - visualGap) / 2 : 0;
+        entries.forEach(function (entry, i) {
+          var isTop = i === 0;
+          var isBottom = i === entries.length - 1;
           ctx.save();
-          ctx.font = "700 11px -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif";
-          ctx.fillStyle = dataset.borderColor || "#52514e";
+          ctx.fillStyle = entry.color;
           ctx.textAlign = "center";
-          ctx.textBaseline = above ? "bottom" : "top";
-          ctx.fillText(String(value), point.x, point.y + (above ? -8 : 8));
+          if (entries.length === 1) {
+            ctx.textBaseline = "bottom";
+            ctx.fillText(String(entry.value), entry.point.x, entry.point.y - WEIGHT_VALUE_LABEL_BASE_OFFSET);
+          } else if (isTop) {
+            ctx.textBaseline = "bottom";
+            ctx.fillText(String(entry.value), entry.point.x, entry.point.y - WEIGHT_VALUE_LABEL_BASE_OFFSET - extraPush);
+          } else if (isBottom) {
+            ctx.textBaseline = "top";
+            ctx.fillText(String(entry.value), entry.point.x, entry.point.y + WEIGHT_VALUE_LABEL_BASE_OFFSET + extraPush);
+          } else {
+            // 3系列以上が同時に表示されるケースは現状想定していないため、簡易的に点の位置へ表示する
+            ctx.textBaseline = "middle";
+            ctx.fillText(String(entry.value), entry.point.x, entry.point.y);
+          }
           ctx.restore();
         });
-      });
+      }
     }
   };
 
