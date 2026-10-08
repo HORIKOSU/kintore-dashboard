@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-10-08T16:49:09Z -->
+<!-- build: 2026-10-08T17:26:47Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -53,31 +53,38 @@
   header.app-header { margin: 18px 20px 0; padding: 24px 26px; border-radius: var(--radius-card); background: var(--surface-dark); box-shadow: var(--shadow-dark); }
   header.app-header h1 { margin: 0 0 6px; font-size: 21px; font-weight: 800; color: var(--text-on-dark); }
   header.app-header p { margin: 0; font-size: 13px; color: rgba(251,245,234,0.72); }
+  /* 2026-10-08：スマホのタブを参考サイト（睡眠管理ツール）の下部固定タブに合わせて変更。
+     全幅・薄いブラー背景・上線のみ・線画アイコン22px＋小さめラベル・選択中は淡い色の角丸タブ。中央の＋ボタンはそのまま維持 */
   nav.tabs.bottom-nav {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 920px;
-    display: flex; align-items: flex-end; justify-content: space-around;
-    gap: 2px; margin: 0; padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-    background: var(--surface-1); border-radius: 22px 22px 0 0;
-    box-shadow: 0 -10px 26px rgba(31,58,61,0.14);
+    position: fixed; bottom: 0; left: 0; right: 0;
+    width: auto; max-width: none;
+    display: flex; align-items: center; justify-content: space-around;
+    gap: 0; margin: 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(255,255,255,0.92);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border); border-radius: 0;
+    box-shadow: none;
     z-index: 500;
   }
   nav.tabs.bottom-nav button { appearance: none; border: none; background: transparent; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    padding: 7px 6px; border-radius: 14px; font-size: 10px; font-weight: 700; color: var(--text-muted);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    padding: 6px 4px; border-radius: 12px; font-family: inherit; font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
     flex: 1 1 0; min-width: 0; transition: background .15s, color .15s;
   }
-  nav.tabs.bottom-nav button .nav-icon { font-size: 18px; line-height: 1; }
+  nav.tabs.bottom-nav button:hover { color: var(--text-primary); }
+  nav.tabs.bottom-nav button .nav-icon { display: block; width: 22px; height: 22px; }
+  nav.tabs.bottom-nav button .nav-icon svg { display: block; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   nav.tabs.bottom-nav button.active { color: var(--series-2); background: rgba(235,104,52,0.12); }
   nav.tabs.bottom-nav .nav-fab {
-    flex: 0 0 auto; position: relative; top: -16px;
-    width: 54px; height: 54px; border-radius: 50%;
+    flex: 0 0 auto; position: relative; top: -14px;
+    width: 52px; height: 52px; border-radius: 50%;
     background: var(--series-2); color: #fff;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 10px 22px rgba(235,104,52,0.45);
+    box-shadow: 0 8px 18px rgba(235,104,52,0.4);
     border: 4px solid var(--page-plane);
     padding: 0;
   }
+  nav.tabs.bottom-nav .nav-fab:hover { color: #fff; }
   nav.tabs.bottom-nav .nav-fab .nav-fab-icon { font-size: 26px; font-weight: 700; line-height: 1; }
   nav.tabs.bottom-nav .nav-fab.active { background: var(--series-2); color: #fff; }
   main { max-width: 920px; margin: 0 auto; padding: 20px; padding-bottom: 108px; }
@@ -330,12 +337,12 @@
 </header>
 
 <nav class="tabs bottom-nav">
-  <button data-tab="dashboard" class="active"><span class="nav-icon">🏠</span><span class="nav-label">ホーム</span></button>
-  <button data-tab="history"><span class="nav-icon">📜</span><span class="nav-label">履歴</span></button>
+  <button data-tab="dashboard" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="nav-label">ホーム</span></button>
+  <button data-tab="history"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-label">履歴</span></button>
   <button type="button" id="fabAddBtn" class="nav-fab" data-tab="add" aria-label="記録を追加"><span class="nav-fab-icon">＋</span></button>
-  <button data-tab="menu"><span class="nav-icon">📋</span><span class="nav-label">種目</span></button>
-  <button data-tab="trainingMenu"><span class="nav-icon">💪</span><span class="nav-label">メニュー</span></button>
-  <button data-tab="bodyGuide"><span class="nav-icon">🧍</span><span class="nav-label">部位</span></button>
+  <button data-tab="menu"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="nav-label">種目</span></button>
+  <button data-tab="trainingMenu"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg></span><span class="nav-label">メニュー</span></button>
+  <button data-tab="bodyGuide"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M6.5 11 12 9.5l5.5 1.5M9 21l3-6 3 6"/></svg></span><span class="nav-label">部位</span></button>
 </nav>
 
 <main>
