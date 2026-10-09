@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-10-08T17:29:44Z -->
+<!-- build: 2026-10-08T17:32:19Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -311,45 +311,19 @@
   .add-result-total { margin-top: 10px; font-size: 12px; color: var(--text-secondary); text-align: right; }
 
   /* 2026-10-08：「前月の総重量に対して、今月はあと何%かをゲージで表して」への対応 */
-  /* 前月比ゲージ v2（2026-10-08）：太いバー＋25/50/75%の目印＋先端のつまみ＋100%の旗＋月末ペース予測 */
-  .vg-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-bottom: 14px; }
-  .vg-main { font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--text-primary); }
-  .vg-main small { font-size: 18px; font-weight: 700; color: var(--text-secondary); margin-left: 3px; letter-spacing: 0; }
+  .vg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .vg-main { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .vg-main small { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-left: 4px; }
   .vg-main.done { color: var(--success); }
-  .vg-note { font-size: 12px; font-weight: 600; color: var(--text-secondary); padding: 4px 10px; background: var(--page-plane); border-radius: 999px; white-space: nowrap; }
-  .vg-bar { position: relative; padding: 0 2px; }
-  .vg-track { position: relative; height: 38px; border-radius: 999px; background: var(--page-plane); box-shadow: inset 0 1px 3px rgba(31,58,61,0.12), inset 0 0 0 1px var(--border); }
-  .vg-ms { position: absolute; top: 7px; bottom: 7px; width: 2px; margin-left: -1px; border-radius: 2px; background: rgba(33,31,26,0.14); }
-  .vg-ghost { position: absolute; top: 0; bottom: 0; border-radius: 999px; border: 2px dashed rgba(27,175,122,0.75); background: rgba(27,175,122,0.10); }
-  .vg-ghost.short { border-color: rgba(235,104,52,0.55); background: rgba(235,104,52,0.07); }
-  .vg-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; min-width: 38px; border-radius: 999px; overflow: hidden;
-    background: repeating-linear-gradient(135deg, rgba(255,255,255,0.22) 0 7px, rgba(255,255,255,0) 7px 14px), linear-gradient(90deg, #f6a77f, var(--series-2));
-    box-shadow: 0 4px 12px rgba(235,104,52,0.35); transition: width 0.9s cubic-bezier(.2,.8,.2,1); }
-  .vg-fill.done { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.22) 0 7px, rgba(255,255,255,0) 7px 14px), linear-gradient(90deg, #4fc48a, #0b9a55); box-shadow: 0 4px 12px rgba(11,154,85,0.35); }
-  .vg-fill::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 45%; background: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0)); border-radius: 999px 999px 0 0; }
-  .vg-knob { position: absolute; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -30px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(33,31,26,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--series-2); transition: left 0.9s cubic-bezier(.2,.8,.2,1); }
-  .vg-knob.done { color: #0b9a55; }
-  .vg-goal { position: absolute; right: -2px; top: -6px; bottom: -6px; width: 4px; border-radius: 3px; background: var(--text-primary); }
-  .vg-scale { position: relative; height: 34px; margin-top: 8px; font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
-  .vg-scale span { position: absolute; top: 0; transform: translateX(-50%); text-align: center; line-height: 1.35; white-space: nowrap; }
-  .vg-scale span.first { transform: none; }
-  .vg-scale span.goal { transform: translateX(-100%); color: var(--text-primary); font-weight: 800; }
-  .vg-scale span.goal em { display: block; font-style: normal; font-weight: 600; color: var(--text-secondary); }
-  .vg-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-  .vg-legend i { display: inline-block; width: 12px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
-  .vg-legend .l-now { background: var(--series-2); }
-  .vg-legend .l-proj { border: 1.5px dashed rgba(27,175,122,0.85); background: rgba(27,175,122,0.15); }
-  .vg-legend .l-proj.short { border-color: rgba(235,104,52,0.7); background: rgba(235,104,52,0.12); }
-  .vg-remain { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: #fff2ea; font-size: 16px; font-weight: 800; color: #eb6834; text-align: center; }
-  .vg-remain.done { background: #e7f6ec; color: #0b7a44; }
-  .vg-proj { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; background: #f6f2e8; color: var(--text-primary); }
-  .vg-proj .ic { font-size: 22px; flex: none; }
-  .vg-proj b { font-size: 15px; font-weight: 800; }
-  .vg-proj.over b { color: #0b7a44; }
-  .vg-proj.under b { color: #d4561f; }
-  .vg-proj .vg-verdict { margin: 1px 0 2px; }
-  .vg-proj .sm { display: block; font-size: 11px; color: var(--text-secondary); }
-  .vg-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .vg-note { font-size: 12px; color: var(--text-secondary); }
+  .vg-track { position: relative; height: 30px; border-radius: 999px; background: var(--page-plane); overflow: hidden; box-shadow: inset 0 0 0 1px var(--border); }
+  .vg-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #f6a77f, var(--series-2)); transition: width 0.7s ease; }
+  .vg-fill.done { background: linear-gradient(90deg, #4fc48a, var(--success)); }
+  .vg-track-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--text-primary); text-shadow: 0 0 4px #fff, 0 0 4px #fff; }
+  .vg-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .vg-remain { margin: 12px 0 0; font-size: 16px; font-weight: 800; color: #eb6834; }
+  .vg-remain.done { color: var(--success); }
+  .vg-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
   .vg-detail .stat-tile { padding: 10px 14px; }
   .vg-detail .stat-tile .value { font-size: 18px; }
 </style>
@@ -1567,61 +1541,27 @@
     var diffKg = Math.round(Math.abs(prev - cur));
     var main, remain;
     if (done) {
+      var over = Math.floor(ratio - 100);
       main = '<div class="vg-main done">' + Math.floor(ratio) + '<small>%</small></div>';
-      remain = '<div class="vg-remain done">🎉 前月を超えました！ +' + Math.floor(ratio - 100) + '%（+' + diffKg.toLocaleString() + 'kg）</div>';
+      remain = '<p class="vg-remain done">🎉 前月を超えました！ +' + over + '%（+' + diffKg.toLocaleString() + 'kg）</p>';
     } else {
+      var left = Math.ceil(100 - ratio);
       main = '<div class="vg-main">' + Math.floor(ratio) + '<small>%</small></div>';
-      remain = '<div class="vg-remain">あと ' + Math.ceil(100 - ratio) + '%（' + diffKg.toLocaleString() + 'kg）で前月と並ぶ🔥</div>';
+      remain = '<p class="vg-remain">あと ' + left + '%（' + diffKg.toLocaleString() + 'kg）で前月と並ぶ🔥</p>';
     }
-
-    // 月末ペース予測：今月ここまでの1日あたりの総重量 × 月の日数（月の3日目以降・記録がある場合のみ）
-    var now = new Date();
-    var dayOfMonth = now.getDate();
-    var daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    var projHtml = "", ghostHtml = "", legendProj = "";
-    if (!done && dayOfMonth >= 3 && cur > 0) {
-      var perDay = cur / dayOfMonth;
-      var projKg = perDay * daysInMonth;
-      var projPct = projKg / prev * 100;
-      var over = projPct >= 100;
-      var ghostEnd = Math.min(100, projPct);
-      if (ghostEnd > fillPct + 1) {
-        ghostHtml = '<div class="vg-ghost' + (over ? '' : ' short') + '" style="left:' + fillPct + '%;width:' + (ghostEnd - fillPct) + '%"></div>';
-      }
-      legendProj = '<span><i class="l-proj' + (over ? '' : ' short') + '"></i>月末の予測（約' + Math.round(projPct) + '%）</span>';
-      projHtml = '<div class="vg-proj ' + (over ? 'over' : 'under') + '"><span class="ic">' + (over ? '📈' : '⏳') + '</span><div>' +
-        '<div>このペースなら月末 <b>約' + Math.round(projPct) + '%</b>（' + Math.round(projKg).toLocaleString() + 'kg）</div>' +
-        '<div class="vg-verdict"><b>' + (over ? '前月を超える見込み！' : '前月まであと' + Math.ceil(100 - projPct) + '%足りない見込み') + '</b></div>' +
-        '<span class="sm">' + dayOfMonth + '日までの1日平均 ' + Math.round(perDay).toLocaleString() + 'kg × ' + daysInMonth + '日で試算</span></div></div>';
-    }
-
-    var ms = [25, 50, 75].map(function (p) { return '<div class="vg-ms" style="left:' + p + '%"></div>'; }).join("");
-    var scale = '<span class="first" style="left:0">0</span>' +
-      [25, 50, 75].map(function (p) { return '<span style="left:' + p + '%">' + p + '%</span>'; }).join("") +
-      '<span class="goal" style="left:100%">' + (done ? '🎉' : '🏁') + ' 前月<em>' + Math.round(prev).toLocaleString() + 'kg</em></span>';
-
     body.innerHTML =
       '<div class="vg-head">' + main + '<div class="vg-note">' + monthLabel(curKey) + ' ÷ ' + monthLabel(prevKey) + '</div></div>' +
-      '<div class="vg-bar"><div class="vg-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.floor(fillPct) + '">' +
-        ms + ghostHtml +
-        '<div class="vg-fill' + (done ? ' done' : '') + '" id="vgFill"></div>' +
-        '<div class="vg-knob' + (done ? ' done' : '') + '" id="vgKnob" style="left:0">' + (done ? '✓' : '') + '</div>' +
-        '<div class="vg-goal"></div></div>' +
-        '<div class="vg-scale">' + scale + '</div></div>' +
-      '<div class="vg-legend"><span><i class="l-now"></i>今月の実績</span>' + legendProj + '</div>' +
-      remain + projHtml +
+      '<div class="vg-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.floor(fillPct) + '">' +
+        '<div class="vg-fill' + (done ? ' done' : '') + '" id="vgFill" style="width:0"></div>' +
+        '<div class="vg-track-label">' + Math.floor(ratio) + '% ／ 100%</div></div>' +
+      '<div class="vg-scale"><span>0%</span><span>50%</span><span>100%（' + monthLabel(prevKey) + '）</span></div>' +
+      remain +
       '<div class="vg-detail">' +
         '<div class="stat-tile"><div class="label">' + monthLabel(curKey) + 'の総重量</div><div class="value">' + Math.round(cur).toLocaleString() + 'kg</div></div>' +
         '<div class="stat-tile"><div class="label">' + monthLabel(prevKey) + 'の総重量</div><div class="value">' + Math.round(prev).toLocaleString() + 'kg</div></div>' +
       '</div>';
-    var fill = document.getElementById("vgFill"), knob = document.getElementById("vgKnob");
-    if (fill) {
-      void fill.offsetWidth;
-      requestAnimationFrame(function () {
-        fill.style.width = fillPct + "%";
-        if (knob) knob.style.left = "max(38px," + fillPct + "%)";
-      });
-    }
+    var fill = document.getElementById("vgFill");
+    if (fill) { void fill.offsetWidth; requestAnimationFrame(function () { fill.style.width = fillPct + "%"; }); }
   }
 
   function renderDashboard() {
