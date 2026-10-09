@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-10-08T17:32:19Z -->
+<!-- build: 2026-10-09T04:12:26Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -311,20 +311,22 @@
   .add-result-total { margin-top: 10px; font-size: 12px; color: var(--text-secondary); text-align: right; }
 
   /* 2026-10-08：「前月の総重量に対して、今月はあと何%かをゲージで表して」への対応 */
-  .vg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .vg-main { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .vg-main small { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-left: 4px; }
+  .vg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .vg-main { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--surface-dark); }
+  .vg-main small { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-left: 3px; }
   .vg-main.done { color: var(--success); }
   .vg-note { font-size: 12px; color: var(--text-secondary); }
-  .vg-track { position: relative; height: 30px; border-radius: 999px; background: var(--page-plane); overflow: hidden; box-shadow: inset 0 0 0 1px var(--border); }
-  .vg-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #f6a77f, var(--series-2)); transition: width 0.7s ease; }
-  .vg-fill.done { background: linear-gradient(90deg, #4fc48a, var(--success)); }
-  .vg-track-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--text-primary); text-shadow: 0 0 4px #fff, 0 0 4px #fff; }
-  .vg-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .vg-remain { margin: 12px 0 0; font-size: 16px; font-weight: 800; color: #eb6834; }
+  /* 2026-10-08 案B：角丸を控えめ（8px）にし、バーはヘッダーと同系のネイビー。今月kgをバー内、前月kgを右端に表示 */
+  .vg-track { position: relative; height: 28px; border-radius: 8px; background: var(--gridline); overflow: hidden; }
+  .vg-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 8px 0 0 8px; background: var(--surface-dark); transition: width .7s ease; display: flex; align-items: center; padding-left: 10px; color: var(--text-on-dark); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; }
+  .vg-fill.done { background: var(--success); border-radius: 8px; color: #fff; }
+  .vg-end { position: absolute; right: 10px; top: 0; bottom: 0; display: flex; align-items: center; font-size: 12px; font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .vg-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .vg-remain { margin: 12px 0 0; font-size: 16px; font-weight: 800; color: var(--surface-dark); }
+  .vg-remain b { color: var(--series-2); }
   .vg-remain.done { color: var(--success); }
   .vg-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-  .vg-detail .stat-tile { padding: 10px 14px; }
+  .vg-detail .stat-tile { padding: 10px 14px; background: var(--surface-1); border: 1px solid var(--gridline); border-left: 4px solid var(--surface-dark); border-radius: 8px; }
   .vg-detail .stat-tile .value { font-size: 18px; }
 </style>
 </head>
@@ -1541,19 +1543,22 @@
     var diffKg = Math.round(Math.abs(prev - cur));
     var main, remain;
     if (done) {
-      var over = Math.floor(ratio - 100);
       main = '<div class="vg-main done">' + Math.floor(ratio) + '<small>%</small></div>';
-      remain = '<p class="vg-remain done">🎉 前月を超えました！ +' + over + '%（+' + diffKg.toLocaleString() + 'kg）</p>';
+      remain = '<p class="vg-remain done">🎉 前月を超えました！ +' + Math.floor(ratio - 100) + '%（+' + diffKg.toLocaleString() + 'kg）</p>';
     } else {
-      var left = Math.ceil(100 - ratio);
       main = '<div class="vg-main">' + Math.floor(ratio) + '<small>%</small></div>';
-      remain = '<p class="vg-remain">あと ' + left + '%（' + diffKg.toLocaleString() + 'kg）で前月と並ぶ🔥</p>';
+      remain = '<p class="vg-remain">あと <b>' + Math.ceil(100 - ratio) + '%</b>（' + diffKg.toLocaleString() + 'kg）で前月と並ぶ🔥</p>';
     }
+    var curKgText = Math.round(cur).toLocaleString() + "kg";
+    var prevKgText = Math.round(prev).toLocaleString() + "kg";
+    // バーが短すぎる場合は今月kgの文字を出さない（下のタイルに出ているため）。長い場合は右端の前月kgと重なるので隠す
+    var fillText = fillPct >= 24 ? curKgText : "";
+    var endText = fillPct <= 70 ? prevKgText : "";
     body.innerHTML =
       '<div class="vg-head">' + main + '<div class="vg-note">' + monthLabel(curKey) + ' ÷ ' + monthLabel(prevKey) + '</div></div>' +
       '<div class="vg-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.floor(fillPct) + '">' +
-        '<div class="vg-fill' + (done ? ' done' : '') + '" id="vgFill" style="width:0"></div>' +
-        '<div class="vg-track-label">' + Math.floor(ratio) + '% ／ 100%</div></div>' +
+        '<div class="vg-fill' + (done ? ' done' : '') + '" id="vgFill">' + (done ? '✓ ' + curKgText : fillText) + '</div>' +
+        '<div class="vg-end">' + endText + '</div></div>' +
       '<div class="vg-scale"><span>0%</span><span>50%</span><span>100%（' + monthLabel(prevKey) + '）</span></div>' +
       remain +
       '<div class="vg-detail">' +
