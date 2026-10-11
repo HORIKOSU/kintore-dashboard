@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-10-10T00:15:27Z -->
+<!-- build: 2026-10-11T06:02:11Z -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -87,6 +87,8 @@
   nav.tabs.bottom-nav .nav-fab:hover { color: #fff; }
   nav.tabs.bottom-nav .nav-fab .nav-fab-icon { font-size: 26px; font-weight: 700; line-height: 1; }
   nav.tabs.bottom-nav .nav-fab.active { background: var(--series-2); color: #fff; }
+  .guide-pane { display: none; }
+  .guide-pane.active { display: block; }
   main { max-width: 920px; margin: 0 auto; padding: 20px; padding-bottom: 108px; }
   section.panel { display: none; }
   section.panel.active { display: block; }
@@ -191,29 +193,50 @@
   .hist-save-btn:hover { opacity: 0.9; }
   .hist-cancel-btn { appearance: none; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 12px; padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; white-space: nowrap; }
   .hist-cancel-btn:hover { background: var(--page-plane); }
-  .hist-groups { display: flex; flex-direction: column; gap: 14px; }
-  .hist-date-group { background: var(--page-plane); border: none; border-radius: 16px; padding: 12px 14px 4px; }
-  .hist-date-heading { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
-  .hist-date-label { font-size: 14px; font-weight: 700; color: var(--series-1); }
-  .hist-date-count { font-size: 10px; font-weight: 600; color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
-  .hist-date-body { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 4px 0 8px 16px; }
-  .hist-date-body::before { content: ""; position: absolute; left: 3px; top: 6px; bottom: 6px; width: 2px; background: var(--gridline); }
   .hist-entry { position: relative; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; padding: 10px 14px; background: var(--page-plane); border: none; border-radius: 14px; }
   .hist-entry-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
   .hist-entry-dot { position: absolute; left: -18px; top: 50%; transform: translateY(-50%); width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--surface-1); box-shadow: 0 0 0 1px var(--gridline); flex-shrink: 0; }
   .hist-entry-name { font-weight: 700; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
   .hist-entry-detail { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .hist-entry-edit { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--surface-1); border: 1px solid var(--series-1); border-radius: 14px; }
-  .menu-day { margin-bottom: 22px; }
-  .menu-day:last-of-type { margin-bottom: 8px; }
-  .menu-day-heading { display: flex; align-items: center; gap: 10px; padding-bottom: 9px; margin-bottom: 12px; border-bottom: 2px solid var(--border); }
-  .menu-day-badge { display: inline-block; flex-shrink: 0; font-size: 11px; font-weight: 700; color: #fff; background: var(--series-1); padding: 4px 11px; border-radius: 999px; letter-spacing: 0.02em; }
-  .menu-day-badge-alt { background: var(--series-2); }
-  .menu-day-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-  .menu-list { list-style: decimal; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
-  .menu-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
-  .menu-ex-name { font-weight: 600; color: var(--text-primary); }
-  .menu-ex-detail { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  /* ---- 履歴：カレンダー＋日のサマリー（2026-10-11） ---- */
+  .hc-wrap { max-width: 520px; margin: 0 auto; }
+  .hc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .hc-head b { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+  .hc-nav { appearance: none; border: none; width: 32px; height: 32px; border-radius: 50%; background: var(--page-plane); color: var(--text-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .hc-nav:hover { background: var(--gridline); }
+  .hc-dow, .hc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .hc-dow div { font-size: 10px; color: var(--text-muted); font-weight: 700; padding-bottom: 4px; }
+  .hc-cell { appearance: none; border: none; background: transparent; font-family: inherit; height: 42px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--text-secondary); position: relative; cursor: pointer; padding: 0; }
+  .hc-cell.hc-out { visibility: hidden; cursor: default; }
+  .hc-cell:not(.hc-out):hover { background: var(--page-plane); }
+  .hc-cell.t1 { background: #d9e6e6; color: var(--text-primary); }
+  .hc-cell.t2 { background: #9fbfc0; color: var(--text-primary); }
+  .hc-cell.t3 { background: #5d8a8d; color: #fff; }
+  .hc-cell.t4 { background: var(--surface-dark); color: #fff; }
+  .hc-cell.sel { outline: 2.5px solid var(--series-2); outline-offset: 1px; }
+  .hc-cell.today::after { content: ""; position: absolute; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--series-2); }
+  .hc-legend { display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 10px; font-size: 10px; color: var(--text-muted); }
+  .hc-legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+  .hd-hero { max-width: 520px; margin: 0 auto 14px; background: var(--surface-dark); color: var(--text-on-dark); border-radius: var(--radius-card); padding: 18px 18px 16px; box-shadow: var(--shadow-dark); }
+  .hd-hero .hd-dt { font-size: 12px; opacity: 0.75; font-weight: 600; }
+  .hd-hero .hd-tot { font-size: 34px; font-weight: 800; margin: 2px 0 10px; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+  .hd-hero .hd-tot small { font-size: 14px; font-weight: 700; opacity: 0.8; margin-left: 3px; }
+  .hd-chips { display: flex; gap: 6px; flex-wrap: wrap; min-height: 24px; }
+  .hd-chip { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(251,245,234,0.14); color: var(--text-on-dark); }
+  .hd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .hd-stats div { background: rgba(251,245,234,0.10); border-radius: 12px; padding: 8px 6px; text-align: center; }
+  .hd-stats b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .hd-stats span { font-size: 10px; opacity: 0.75; }
+  .hd-list { max-width: 520px; margin: 0 auto; }
+  .hd-list .hist-entry { margin-bottom: 8px; }
+  .hd-list .hist-entry-dot { position: static; transform: none; width: 9px; height: 9px; border: none; box-shadow: none; }
+  .hd-list .hist-entry-detail { white-space: normal; }
+  .hd-sub { font-size: 12px; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums; margin-right: 4px; }
+  .hd-empty { max-width: 520px; margin: 0 auto 14px; }
+  .cu-pop { animation: cuPop 0.35s ease; transform-origin: left center; }
+  @keyframes cuPop { 0% { transform: scale(1); } 40% { transform: scale(1.07); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .cu-pop { animation: none; } }
   .body-diagram-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
   .body-diagram-svg { width: 100%; max-width: 420px; height: auto; }
   .body-diagram-title { font-size: 11px; font-weight: 700; fill: var(--text-secondary); }
@@ -255,8 +278,7 @@
     .hist-entry-main { width: 100%; }
     .hist-row-actions { width: 100%; justify-content: flex-end; }
     .hist-edit-field { flex: 1 1 100%; }
-    .menu-list li { flex-direction: column; align-items: flex-start; gap: 2px; }
-    .hero-ring-card { flex-direction: column; text-align: center; }
+      .hero-ring-card { flex-direction: column; text-align: center; }
     .hero-ring-info { width: 100%; }
   }
 
@@ -352,8 +374,7 @@
   <button data-tab="history"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-label">履歴</span></button>
   <button type="button" id="fabAddBtn" class="nav-fab" data-tab="add" aria-label="記録を追加"><span class="nav-fab-icon">＋</span></button>
   <button data-tab="menu"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="nav-label">種目</span></button>
-  <button data-tab="trainingMenu"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg></span><span class="nav-label">メニュー</span></button>
-  <button data-tab="bodyGuide"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M6.5 11 12 9.5l5.5 1.5M9 21l3-6 3 6"/></svg></span><span class="nav-label">部位</span></button>
+  <button data-tab="guide"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h13v-4"/></svg></span><span class="nav-label">部位ガイド</span></button>
 </nav>
 
 <main>
@@ -513,14 +534,15 @@
 
   <section id="history" class="panel">
     <div class="card">
-      <h2>記録の履歴</h2>
+      <h2>記録の履歴<span class="sub">日付をタップ</span></h2>
       <div class="filter-row">
         <div class="filter-item"><label class="field-label">種目</label>
           <select id="histExerciseFilter"><option value="__all__">全種目</option></select>
         </div>
       </div>
-      <div id="historyTableWrap"></div>
+      <div id="histCalWrap"></div>
     </div>
+    <div id="historyTableWrap"></div>
   </section>
 
   <section id="menu" class="panel">
@@ -550,30 +572,8 @@
 
   </section>
 
-  <section id="trainingMenu" class="panel">
-    <div class="card">
-      <h2>腕トレーニングメニュー<span class="sub">肘・上腕（力こぶ〜二の腕）を鍛える週2回メニュー</span></h2>
-      <div class="menu-day">
-        <div class="menu-day-heading"><span class="menu-day-badge">Day A</span><span class="menu-day-name">三頭筋メイン</span></div>
-        <ol class="menu-list">
-          <li><span class="menu-ex-name">クローズグリップベンチプレス</span><span class="menu-ex-detail">3〜4セット × 8〜10回</span></li>
-          <li><span class="menu-ex-name">トライセプスエクステンション</span><span class="menu-ex-detail">3セット × 10〜12回</span></li>
-          <li><span class="menu-ex-name">ハンマーカール（補助）</span><span class="menu-ex-detail">2〜3セット × 10〜12回</span></li>
-        </ol>
-      </div>
-      <div class="menu-day">
-        <div class="menu-day-heading"><span class="menu-day-badge menu-day-badge-alt">Day B</span><span class="menu-day-name">二頭筋メイン</span></div>
-        <ol class="menu-list">
-          <li><span class="menu-ex-name">アームカール</span><span class="menu-ex-detail">3セット × 8〜12回</span></li>
-          <li><span class="menu-ex-name">ハンマーカール</span><span class="menu-ex-detail">3セット × 10〜12回</span></li>
-          <li><span class="menu-ex-name">トライセプスエクステンション（補助）</span><span class="menu-ex-detail">2〜3セット × 12〜15回</span></li>
-        </ol>
-      </div>
-      <p class="generated-note">週2回、中2〜3日空けて実施。上腕三頭筋は上腕全体の6〜7割を占めるとされるため、腕を太くしたい場合は三頭筋を軸に。重量は「最後の1〜2回がギリギリ挙がる」強度を目安に少しずつ増やす。</p>
-    </div>
-  </section>
-
-  <section id="bodyGuide" class="panel">
+  <section id="guide" class="panel">
+  <div id="bodyGuide" class="guide-pane active">
     <div class="card">
       <h2>筋肉の部位ガイド<span class="sub">種目の「部位」がどこを指すか、正面・背面のイラストで確認</span></h2>
       <div class="body-diagram-wrap">
@@ -640,6 +640,7 @@
       <h2>筋肉部位ごとのメニュー<span class="sub">その部位を鍛えている登録種目（固定メニューがある部位は参照先も表示）</span></h2>
       <div id="bodyGuideExerciseList"></div>
     </div>
+  </div>
   </section>
 </main>
 
@@ -715,7 +716,6 @@
   // それ以外のカテゴリはそのカテゴリの代表筋肉1つに割り当てる。
   var MUSCLE_ORDER = ["大胸筋", "広背筋・僧帽筋", "三角筋", "二頭筋", "三頭筋", "前腕", "腹直筋", "大腿四頭筋", "ハムストリング", "ふくらはぎ"];
   var MUSCLE_CATEGORY_MAP = { "大胸筋": "胸", "広背筋・僧帽筋": "背中", "三角筋": "肩", "二頭筋": "腕", "三頭筋": "腕", "前腕": "腕", "腹直筋": "体幹", "大腿四頭筋": "脚", "ハムストリング": "脚", "ふくらはぎ": "脚" };
-  var MUSCLE_MENU_NOTE = { "二頭筋": "「トレーニングメニュー」タブ・Day B（二頭筋メイン）", "三頭筋": "「トレーニングメニュー」タブ・Day A（三頭筋メイン）" };
   function muscleForExercise(ex) {
     if (ex.category === "腕") {
       if (ex.name === "トライセプスエクステンション" || ex.name === "クローズグリップベンチプレス") return "三頭筋";
@@ -764,9 +764,11 @@
       document.querySelectorAll("section.panel").forEach(function (p) { p.classList.remove("active"); });
       btn.classList.add("active");
       document.getElementById(btn.dataset.tab).classList.add("active");
-      if (btn.dataset.tab === "dashboard") { renderVolumeGauge(); }
+      if (btn.dataset.tab === "dashboard") { renderVolumeGauge(); playHeroRing(); countUpIn("dashboard"); }
+      if (btn.dataset.tab === "history") { countUpIn("historyTableWrap"); }
     });
   });
+
 
   // ---- menu ----
   function renderMenu() {
@@ -797,16 +799,12 @@
     MUSCLE_ORDER.forEach(function (m) {
       var cat = MUSCLE_CATEGORY_MAP[m];
       var exNames = byMuscle[m];
-      var menuNote = MUSCLE_MENU_NOTE[m];
       html += '<div class="body-part-group"><div class="body-part-heading"><span class="body-part-dot" style="background:' + categoryColorVar(cat) + '"></span>' +
         '<span class="body-part-name">' + escapeHtml(m) + '</span></div>';
       if (exNames && exNames.length > 0) {
         html += '<div class="body-part-exercises">' + exNames.map(escapeHtml).join("、") + '</div>';
       } else {
         html += '<div class="body-part-exercises body-part-empty">この部位を鍛える種目はまだ登録されていません。</div>';
-      }
-      if (menuNote) {
-        html += '<div class="body-part-menu-note">固定メニュー：' + escapeHtml(menuNote) + '</div>';
       }
       html += '</div>';
     });
@@ -1519,7 +1517,8 @@
 
     var progressEl = document.getElementById("heroRingProgress");
     progressEl.style.strokeDasharray = String(HERO_RING_CIRCUMFERENCE);
-    progressEl.style.strokeDashoffset = String(offset);
+    heroRingTarget = offset;
+    playHeroRing();
     document.getElementById("heroRingPct").textContent = pct + "%";
     document.getElementById("heroRingLabel").textContent = "今月 " + sessionsThisMonth + "/" + target + " 回";
   }
@@ -1614,6 +1613,66 @@
     animateVolumeGauge(fillPct, ratio, cur, done, curKgText, fillText);
   }
 
+  // ---- 数字のカウントアップ（2026-10-11） ----
+  // 「0 → 最終値」へ約0.9秒でカウントアップ。要素の先頭テキストの数字だけを動かし、単位・符号・小数桁・桁区切りはそのまま維持する。
+  // 再描画で最終値が差し替わっても追従する。prefers-reduced-motion の端末では何もしない（即最終値）。
+  function prefersReducedMotion() {
+    try { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); } catch (e) { return false; }
+  }
+  function countUpEl(el, delay) {
+    if (prefersReducedMotion()) return;
+    var node = el.firstChild;
+    if (!node || node.nodeType !== 3) return;
+    var finalText = node.data;
+    if (el._cuAnim && el._cuLast === node.data) finalText = el._cuFinal;
+    var mt = /^([+\-−]?)(\d[\d,]*)(\.\d+)?([\s\S]*)$/.exec(finalText);
+    if (!mt) return;
+    var to = parseFloat(mt[2].replace(/,/g, "") + (mt[3] || ""));
+    if (!(to > 0)) return;
+    var dec = mt[3] ? mt[3].length - 1 : 0, comma = mt[2].indexOf(",") >= 0;
+    function fmt(v) {
+      var s = v.toFixed(dec);
+      if (comma) { var p = s.split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); s = p.join("."); }
+      return mt[1] + s + mt[4];
+    }
+    var token = (el._cuTok = (el._cuTok || 0) + 1);
+    el._cuFinal = finalText; el._cuAnim = true;
+    node.data = el._cuLast = fmt(0);
+    var dur = 900, start = null;
+    function step(ts) {
+      if (el._cuTok !== token) return;
+      if (start === null) start = ts + (delay || 0);
+      var t = (ts - start) / dur;
+      if (t < 0) { requestAnimationFrame(step); return; }
+      if (t >= 1) {
+        node.data = el._cuLast = finalText; el._cuAnim = false;
+        el.classList.remove("cu-pop"); void el.offsetWidth; el.classList.add("cu-pop");
+        return;
+      }
+      var e = 1 - Math.pow(1 - t, 3);
+      node.data = el._cuLast = fmt(to * e);
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function countUpIn(root) {
+    if (typeof root === "string") root = document.getElementById(root);
+    if (!root) return;
+    var els = root.querySelectorAll(".stat-tile .value, .hero-ring-pct, .hd-tot, .hd-stats b");
+    for (var i = 0; i < els.length; i++) countUpEl(els[i], Math.min(i, 8) * 50);
+  }
+  var heroRingTarget = null;
+  function playHeroRing() {
+    var el = document.getElementById("heroRingProgress");
+    if (!el || !heroRingTarget) return;
+    if (prefersReducedMotion()) { el.style.strokeDashoffset = String(heroRingTarget); return; }
+    el.style.transition = "none";
+    el.style.strokeDashoffset = String(HERO_RING_CIRCUMFERENCE);
+    void el.getBoundingClientRect();
+    el.style.transition = "stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)";
+    el.style.strokeDashoffset = String(heroRingTarget);
+  }
+
   function renderDashboard() {
     renderStatRow();
     renderHeroCard();
@@ -1625,6 +1684,7 @@
     renderVolumeExerciseTabs();
     renderVolumeChart();
     renderWeightChart();
+    countUpIn("dashboard");
   }
   document.getElementById("freqExerciseFilter").addEventListener("change", renderFreqChart);
   document.getElementById("weightExerciseFilter").addEventListener("change", renderWeightChart);
@@ -1632,61 +1692,125 @@
 
   // ---- history ----
   var historyEditingKey = null;
+  var histMonth = null;   // 履歴カレンダーで表示中の月（"YYYY-MM"）
+  var histSelDate = null; // 選択中の日付（"YYYY-MM-DD"）
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function todayLocalStr() { var t = new Date(); return t.getFullYear() + "-" + pad2(t.getMonth() + 1) + "-" + pad2(t.getDate()); }
   function renderHistoryTable() {
     var exId = document.getElementById("histExerciseFilter").value;
-    var filtered = state.logs.filter(function (l) { return exId === "__all__" || l.exerciseId === exId; })
-      .sort(function (a, b) { return (b.date + b.setNumber).localeCompare(a.date + a.setNumber); });
-    var groups = groupLogsForDisplay(filtered);
+    var filtered = state.logs.filter(function (l) { return exId === "__all__" || l.exerciseId === exId; });
+    var calWrap = document.getElementById("histCalWrap");
     var wrap = document.getElementById("historyTableWrap");
-    if (groups.length === 0) { wrap.innerHTML = '<div class="empty-state">記録がありません。</div>'; return; }
 
-    var dateOrder = [];
+    // 日ごとの集計
     var byDate = {};
-    groups.forEach(function (g) {
-      if (!byDate[g.date]) { byDate[g.date] = []; dateOrder.push(g.date); }
-      byDate[g.date].push(g);
+    filtered.forEach(function (l) {
+      var d = byDate[l.date] || (byDate[l.date] = { vol: 0, sets: 0, repsSum: 0, exIds: {} });
+      d.vol += l.weight * l.reps; d.sets++; d.repsSum += l.reps; d.exIds[l.exerciseId] = true;
     });
+    var dates = Object.keys(byDate).sort();
+    if (!histMonth) {
+      histMonth = dates.length ? monthKey(dates[dates.length - 1]) : monthKey(todayLocalStr());
+    }
+    var monthDates = dates.filter(function (d) { return monthKey(d) === histMonth; });
+    if (!histSelDate || monthKey(histSelDate) !== histMonth) {
+      histSelDate = monthDates.length ? monthDates[monthDates.length - 1] : null;
+    }
 
-    var html = '<div class="hist-groups">';
-    dateOrder.forEach(function (date) {
-      var dayGroups = byDate[date];
-      html += '<div class="hist-date-group"><div class="hist-date-heading"><span class="hist-date-label">' +
-        escapeHtml(formatDateHeading(date)) + '</span><span class="hist-date-count">' + dayGroups.length + '件</span></div><div class="hist-date-body">';
-      dayGroups.forEach(function (g) {
-        var ex = exerciseById(g.exerciseId);
-        var key = g.date + "|" + g.exerciseId + "|" + g.weight + "|" + g.reps;
-        if (key === historyEditingKey) {
-          var exOptions = state.exercises.map(function (e) {
-            return '<option value="' + e.id + '"' + (e.id === g.exerciseId ? " selected" : "") + '>' + escapeHtml(e.name) + '</option>';
-          }).join("");
-          html += '<div class="hist-entry-edit" data-key="' + escapeHtml(key) + '">' +
-            '<div class="hist-edit-fields">' +
-            '<div class="hist-edit-field"><label>日付</label><input type="date" class="hist-edit-date" value="' + g.date + '"></div>' +
-            '<div class="hist-edit-field"><label>種目</label><select class="hist-edit-exercise">' + exOptions + '</select></div>' +
-            '<div class="hist-edit-field"><label>重量(kg)</label><input type="number" class="hist-edit-weight" value="' + g.weight + '" step="0.5" min="0"></div>' +
-            '<div class="hist-edit-field"><label>回数</label><input type="number" class="hist-edit-reps" value="' + g.reps + '" step="1" min="1"></div>' +
-            '<div class="hist-edit-field"><label>セット数</label><input type="number" class="hist-edit-count" value="' + g.count + '" step="1" min="1"></div>' +
-            '</div>' +
-            '<div class="hist-edit-actions"><button type="button" class="hist-save-btn">保存</button><button type="button" class="hist-cancel-btn">キャンセル</button></div>' +
-            '</div>';
-        } else {
-          var color = ex ? exerciseColorVar(g.exerciseId) : "var(--text-muted)";
-          var name = ex ? ex.name : "（削除済み）";
-          html += '<div class="hist-entry" data-key="' + escapeHtml(key) + '">' +
-            '<div class="hist-entry-main"><span class="hist-entry-dot" style="background:' + color + '"></span>' +
-            '<span class="hist-entry-name">' + escapeHtml(name) + '</span>' +
-            '<span class="hist-entry-detail">' + g.weight + 'kg × ' + g.reps + '回 × ' + g.count + 'セット</span></div>' +
-            '<div class="hist-row-actions"><button type="button" class="hist-edit-btn" data-key="' + escapeHtml(key) + '">編集</button>' +
-            '<button type="button" class="hist-delete-btn" data-key="' + escapeHtml(key) + '">削除</button></div>' +
-            '</div>';
-        }
-      });
-      html += '</div></div>';
+    // カレンダー
+    var mp = histMonth.split("-"), y = parseInt(mp[0], 10), m = parseInt(mp[1], 10);
+    var firstDow = new Date(y, m - 1, 1).getDay();
+    var daysInMonth = new Date(y, m, 0).getDate();
+    var maxVol = 0;
+    monthDates.forEach(function (d) { if (byDate[d].vol > maxVol) maxVol = byDate[d].vol; });
+    var today = todayLocalStr();
+    var ch = '<div class="hc-wrap"><div class="hc-head"><button type="button" class="hc-nav" data-hc-nav="-1" aria-label="前の月">‹</button><b>' + y + '年' + m + '月</b><button type="button" class="hc-nav" data-hc-nav="1" aria-label="次の月">›</button></div>';
+    ch += '<div class="hc-dow">' + ["日", "月", "火", "水", "木", "金", "土"].map(function (w) { return '<div>' + w + '</div>'; }).join("") + '</div><div class="hc-grid">';
+    for (var i = 0; i < firstDow; i++) ch += '<span class="hc-cell hc-out"></span>';
+    for (var dd = 1; dd <= daysInMonth; dd++) {
+      var ds = histMonth + "-" + pad2(dd);
+      var cls = "hc-cell";
+      if (byDate[ds]) {
+        var r = maxVol > 0 ? byDate[ds].vol / maxVol : 0;
+        cls += r >= 0.85 ? " t4" : r >= 0.6 ? " t3" : r >= 0.35 ? " t2" : " t1";
+      }
+      if (ds === histSelDate) cls += " sel";
+      if (ds === today) cls += " today";
+      ch += '<button type="button" class="' + cls + '" data-hc-date="' + ds + '">' + dd + '</button>';
+    }
+    ch += '</div><div class="hc-legend">少 <i style="background:#d9e6e6"></i><i style="background:#9fbfc0"></i><i style="background:#5d8a8d"></i><i style="background:#1f3a3d"></i> 多（月内での日ごとの総重量）</div></div>';
+    calWrap.innerHTML = ch;
+
+    // 選択日のサマリー＋内訳
+    if (!histSelDate || !byDate[histSelDate]) {
+      var msg = histSelDate ? "この日の記録はありません。" : "この月の記録はありません。";
+      wrap.innerHTML = '<div class="card hd-empty"><div class="empty-state">' + msg + '</div></div>';
+      return;
+    }
+    var s = byDate[histSelDate];
+    var cats = [];
+    Object.keys(s.exIds).forEach(function (id) { var ex = exerciseById(id); var c = ex ? ex.category : "その他"; if (cats.indexOf(c) < 0) cats.push(c); });
+    cats.sort(function (a, b) { return CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b); });
+    var html = '<div class="hd-hero"><div class="hd-dt">' + escapeHtml(formatDateHeading(histSelDate)) + '</div>' +
+      '<div class="hd-tot">' + Math.round(s.vol).toLocaleString() + '<small>kg</small></div>' +
+      '<div class="hd-chips">' + cats.map(function (c) { return '<span class="hd-chip">' + escapeHtml(c) + '</span>'; }).join("") + '</div>' +
+      '<div class="hd-stats"><div><b>' + Object.keys(s.exIds).length + '</b><span>種目</span></div><div><b>' + s.sets + '</b><span>セット</span></div><div><b>' + (Math.round(s.repsSum / s.sets * 10) / 10) + '</b><span>平均回数</span></div></div></div>';
+
+    var dayLogs = filtered.filter(function (l) { return l.date === histSelDate; })
+      .sort(function (a, b) { return a.setNumber - b.setNumber; });
+    var groups = groupLogsForDisplay(dayLogs);
+    html += '<div class="card hd-list">';
+    groups.forEach(function (g) {
+      var ex = exerciseById(g.exerciseId);
+      var key = g.date + "|" + g.exerciseId + "|" + g.weight + "|" + g.reps;
+      if (key === historyEditingKey) {
+        var exOptions = state.exercises.map(function (e) {
+          return '<option value="' + e.id + '"' + (e.id === g.exerciseId ? " selected" : "") + '>' + escapeHtml(e.name) + '</option>';
+        }).join("");
+        html += '<div class="hist-entry-edit" data-key="' + escapeHtml(key) + '">' +
+          '<div class="hist-edit-fields">' +
+          '<div class="hist-edit-field"><label>日付</label><input type="date" class="hist-edit-date" value="' + g.date + '"></div>' +
+          '<div class="hist-edit-field"><label>種目</label><select class="hist-edit-exercise">' + exOptions + '</select></div>' +
+          '<div class="hist-edit-field"><label>重量(kg)</label><input type="number" class="hist-edit-weight" value="' + g.weight + '" step="0.5" min="0"></div>' +
+          '<div class="hist-edit-field"><label>回数</label><input type="number" class="hist-edit-reps" value="' + g.reps + '" step="1" min="1"></div>' +
+          '<div class="hist-edit-field"><label>セット数</label><input type="number" class="hist-edit-count" value="' + g.count + '" step="1" min="1"></div>' +
+          '</div>' +
+          '<div class="hist-edit-actions"><button type="button" class="hist-save-btn">保存</button><button type="button" class="hist-cancel-btn">キャンセル</button></div>' +
+          '</div>';
+      } else {
+        var color = ex ? exerciseColorVar(g.exerciseId) : "var(--text-muted)";
+        var name = ex ? ex.name : "（削除済み）";
+        var sub = Math.round(g.weight * g.reps * g.count).toLocaleString();
+        html += '<div class="hist-entry" data-key="' + escapeHtml(key) + '">' +
+          '<div class="hist-entry-main"><span class="hist-entry-dot" style="background:' + color + '"></span>' +
+          '<span class="hist-entry-name">' + escapeHtml(name) + '</span>' +
+          '<span class="hist-entry-detail">' + g.weight + 'kg × ' + g.reps + '回 × ' + g.count + 'セット</span></div>' +
+          '<div class="hist-row-actions"><span class="hd-sub">' + sub + 'kg</span><button type="button" class="hist-edit-btn" data-key="' + escapeHtml(key) + '">編集</button>' +
+          '<button type="button" class="hist-delete-btn" data-key="' + escapeHtml(key) + '">削除</button></div>' +
+          '</div>';
+      }
     });
     wrap.innerHTML = html + '</div>';
+    countUpIn(wrap);
   }
+  document.getElementById("histCalWrap").addEventListener("click", function (evt) {
+    var nav = evt.target.closest ? evt.target.closest("[data-hc-nav]") : null;
+    if (nav) {
+      var p = histMonth.split("-");
+      var dt = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1 + parseInt(nav.getAttribute("data-hc-nav"), 10), 1);
+      histMonth = dt.getFullYear() + "-" + pad2(dt.getMonth() + 1);
+      histSelDate = null; historyEditingKey = null;
+      renderHistoryTable();
+      return;
+    }
+    var cell = evt.target.closest ? evt.target.closest("[data-hc-date]") : null;
+    if (cell) {
+      histSelDate = cell.getAttribute("data-hc-date"); historyEditingKey = null;
+      renderHistoryTable();
+    }
+  });
   document.getElementById("histExerciseFilter").addEventListener("change", function () {
-    historyEditingKey = null;
+    historyEditingKey = null; histMonth = null; histSelDate = null;
     renderHistoryTable();
   });
 
@@ -1741,6 +1865,7 @@
 
       persistState();
       historyEditingKey = null;
+      histSelDate = newDate; histMonth = monthKey(newDate);
       renderAll();
       return;
     }
