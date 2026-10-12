@@ -2157,7 +2157,7 @@
       '<div class="add-result-total">' + esc(date) + ' の ' + esc(ex ? ex.name : "") + '：合計 ' + rows.length + 'セット／' + Math.round(totalVol).toLocaleString() + 'kg</div>';
     // アニメーションを毎回再生する
     host.style.animation = "none"; void host.offsetWidth; host.style.animation = "";
-    try { host.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
+    // 画面は自動スクロールしない（2026-10-12：追加時に画面が動くのを止めるため、結果カードへのscrollIntoViewを削除）。
     try { if (navigator.vibrate) navigator.vibrate(isMax ? [40, 60, 40] : 40); } catch (e) {}
   }
 
