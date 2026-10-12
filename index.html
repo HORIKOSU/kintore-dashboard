@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>LiftLog</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%8B%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <script>/*!
@@ -59,7 +59,7 @@
     position: fixed; bottom: 0; left: 0; right: 0;
     width: auto; max-width: none;
     display: flex; align-items: center; justify-content: space-around;
-    gap: 0; margin: 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    gap: 0; margin: 0; padding: 8px 8px calc(16px + env(safe-area-inset-bottom));
     background: rgba(255,255,255,0.92);
     -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
     border-top: 1px solid var(--border); border-radius: 0;
@@ -68,16 +68,17 @@
   }
   nav.tabs.bottom-nav button { appearance: none; border: none; background: transparent; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-    padding: 6px 4px; border-radius: 12px; font-family: inherit; font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
-    flex: 1 1 0; min-width: 0; transition: background .15s, color .15s;
+    padding: 8px 2px; min-height: 56px; border-radius: 14px; font-family: inherit; font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+    flex: 1 1 0; min-width: 0; transition: background .15s, color .15s; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   nav.tabs.bottom-nav button:hover { color: var(--text-primary); }
+  nav.tabs.bottom-nav button .nav-label { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   nav.tabs.bottom-nav button .nav-icon { display: block; width: 22px; height: 22px; }
   nav.tabs.bottom-nav button .nav-icon svg { display: block; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   nav.tabs.bottom-nav button.active { color: var(--series-2); background: rgba(235,104,52,0.12); }
   nav.tabs.bottom-nav .nav-fab {
-    flex: 0 0 auto; position: relative; top: -14px;
-    width: 52px; height: 52px; border-radius: 50%;
+    flex: 0 0 auto; position: relative; top: -16px; margin: 0 6px;
+    width: 56px; height: 56px; border-radius: 50%;
     background: var(--series-2); color: #fff;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 8px 18px rgba(235,104,52,0.4);
@@ -89,7 +90,7 @@
   nav.tabs.bottom-nav .nav-fab.active { background: var(--series-2); color: #fff; }
   .guide-pane { display: none; }
   .guide-pane.active { display: block; }
-  main { max-width: 920px; margin: 0 auto; padding: 20px; padding-bottom: 108px; }
+  main { max-width: 920px; margin: 0 auto; padding: 20px; padding-bottom: 124px; }
   section.panel { display: none; }
   section.panel.active { display: block; }
   .card { background: var(--surface-1); border: none; border-radius: var(--radius-card); padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow-card); }
@@ -237,6 +238,25 @@
   .cu-pop { animation: cuPop 0.35s ease; transform-origin: left center; }
   @keyframes cuPop { 0% { transform: scale(1); } 40% { transform: scale(1.07); } 100% { transform: scale(1); } }
   @media (prefers-reduced-motion: reduce) { .cu-pop { animation: none; } }
+  .guide-toggle { margin-bottom: 14px; }
+  .kn-lead { font-size: 13px; line-height: 1.7; color: var(--text-secondary); margin: 0 0 12px; }
+  .kn-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 14px; background: var(--page-plane); border-radius: 12px; margin-bottom: 8px; font-size: 13px; }
+  .kn-k { font-weight: 700; color: var(--text-primary); flex: 0 0 auto; }
+  .kn-v { color: var(--text-secondary); text-align: right; line-height: 1.55; }
+  .kn-list { margin: 10px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+  .kn-list li { margin-bottom: 6px; }
+  .kn-list b { color: var(--text-primary); }
+  .kn-h3 { margin: 16px 0 8px; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+  .kn-part { padding: 12px 14px; background: var(--page-plane); border-radius: 12px; margin-bottom: 8px; font-size: 12.5px; line-height: 1.65; color: var(--text-secondary); }
+  .kn-part-name { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+  .kn-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .kn-part b { color: var(--text-primary); font-weight: 700; }
+  .kn-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; background: var(--gridline); color: var(--text-secondary); white-space: nowrap; }
+  .kn-tag.ok { background: #e3f3e8; color: var(--success); }
+  .kn-src { font-size: 12.5px; line-height: 1.7; color: var(--text-secondary); padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .kn-src:last-of-type { border-bottom: none; }
+  .kn-src a { color: var(--series-1); font-weight: 600; word-break: break-all; }
+  @media (max-width: 640px) { .kn-row { flex-direction: column; gap: 2px; } .kn-v { text-align: left; } }
   .body-diagram-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
   .body-diagram-svg { width: 100%; max-width: 420px; height: auto; }
   .body-diagram-title { font-size: 11px; font-weight: 700; fill: var(--text-secondary); }
@@ -269,7 +289,7 @@
   .hist-edit-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
   @media (max-width: 600px) {
-    main { padding: 14px 12px; padding-bottom: 100px; }
+    main { padding: 14px 12px; padding-bottom: 116px; }
     header.app-header { margin: 12px 12px 0; padding: 18px 18px; border-radius: 18px; }
     .card { padding: 14px; border-radius: 16px; }
     .filter-item { min-width: 0; flex: 1 1 140px; }
@@ -374,7 +394,7 @@
   <button data-tab="history"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-label">履歴</span></button>
   <button type="button" id="fabAddBtn" class="nav-fab" data-tab="add" aria-label="記録を追加"><span class="nav-fab-icon">＋</span></button>
   <button data-tab="menu"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="nav-label">種目</span></button>
-  <button data-tab="guide"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h13v-4"/></svg></span><span class="nav-label">部位ガイド</span></button>
+  <button data-tab="guide"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h13v-4"/></svg></span><span class="nav-label">ガイド</span></button>
 </nav>
 
 <main>
@@ -573,6 +593,10 @@
   </section>
 
   <section id="guide" class="panel">
+  <div class="cal-view-toggle guide-toggle">
+    <button type="button" class="cal-view-btn active" data-guide="bodyGuide">部位ガイド</button>
+    <button type="button" class="cal-view-btn" data-guide="knowledgeGuide">知識まとめ</button>
+  </div>
   <div id="bodyGuide" class="guide-pane active">
     <div class="card">
       <h2>筋肉の部位ガイド<span class="sub">種目の「部位」がどこを指すか、正面・背面のイラストで確認</span></h2>
@@ -639,6 +663,62 @@
     <div class="card">
       <h2>筋肉部位ごとのメニュー<span class="sub">その部位を鍛えている登録種目（固定メニューがある部位は参照先も表示）</span></h2>
       <div id="bodyGuideExerciseList"></div>
+    </div>
+  </div>
+
+  <div id="knowledgeGuide" class="guide-pane">
+    <div class="card">
+      <h2>筋トレの基礎知識<span class="sub">2026年10月12日時点</span></h2>
+      <p class="kn-lead">最新の公式な指針は、ACSM（米国スポーツ医学会）が2026年4月号の MSSE に出した新しい声明（2009年版以来17年ぶりの更新）です。結論は「完璧な計画より、続けられる計画」です。</p>
+<div class="kn-row"><span class="kn-k">共通</span><span class="kn-v">全身の主要な筋群を週2日以上。少しずつ増やす</span></div><div class="kn-row"><span class="kn-k">筋肥大</span><span class="kn-v">1つの筋群につき週およそ10セット</span></div><div class="kn-row"><span class="kn-k">筋力</span><span class="kn-v">1RMの約80%で、1種目2〜3セット</span></div><div class="kn-row"><span class="kn-k">パワー</span><span class="kn-v">1RMの30〜70%で、持ち上げる局面をできるだけ速く</span></div>
+      <ul class="kn-list">
+        <li><b>何もしないより、少しでもやる。</b>いちばん大きな伸びは「ゼロ→少し」で出ます。</li>
+        <li><b>次の3つは、平均的な健康な成人の結果を一貫して変えなかったとされています。</b>限界まで追い込むこと、マシンかフリーウエイトか、複雑な期分けです。</li>
+        <li><b>ゴムバンド・自重・自宅トレでも効果があります。</b></li>
+        <li>対象は健康な成人です。競技者や上級者は、目的に合わせた計画が別途必要です。</li>
+      </ul>
+      <div class="kn-h3">現場でよく使われる補足<span class="kn-tag">一般的な目安</span></div>
+      <ul class="kn-list">
+        <li><b>漸進性過負荷：</b>重量・回数・セット数のどれかを、少しずつ増やし続けること。</li>
+        <li><b>RIR（あと何回できるか）：</b>各セットを「あと1〜3回できる」ところで止める目安。</li>
+        <li><b>ボリューム：</b>重量×回数×セット数。LiftLog の「総重量」と同じ考え方です。</li>
+        <li><b>休憩時間：</b>重い多関節種目は2〜3分、補助種目は1〜2分が一般的な目安です（声明の要約では具体的な数字は確認できませんでした）。</li>
+        <li><b>フォーム：</b>重さより、狙った筋肉に効く動きを優先。可動域を使い、反動は使いません。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>部位別のコツ<span class="sub">部位ごとに主役の種目を1〜2個決める<span class="kn-tag">一般的な目安</span></span></h2>
+<div class="kn-part"><div class="kn-part-name"><span class="kn-dot" style="background:var(--series-1)"></span>胸（大胸筋）</div><b>代表種目：</b>ベンチプレス、ダンベルプレス<br><b>ポイント：</b>肩甲骨を寄せて下げる。バーは乳首の高さを目安に下ろす。足で床を押す。<br><b>よくあるミス：</b>肩が前に出る、肘を横に開きすぎる、反動で押す。</div><div class="kn-part"><div class="kn-part-name"><span class="kn-dot" style="background:var(--series-2)"></span>背中（広背筋・僧帽筋）</div><b>代表種目：</b>ラットプルダウン、ローイング、デッドリフト<br><b>ポイント：</b>手で引くより「肘を引く」意識。胸を張って背中を丸めない。<br><b>よくあるミス：</b>腕だけで引く、上体を振って反動を使う。</div><div class="kn-part"><div class="kn-part-name"><span class="kn-dot" style="background:var(--series-4)"></span>肩（三角筋）</div><b>代表種目：</b>ショルダープレス、サイドレイズ<br><b>ポイント：</b>サイドレイズは軽めの重さで、肘を先に上げるイメージ。<br><b>よくあるミス：</b>重すぎて僧帽筋で上げる、腰を反らせる。</div><div class="kn-part"><div class="kn-part-name"><span class="kn-dot" style="background:var(--series-7)"></span>腕（二頭筋・三頭筋）</div><b>代表種目：</b>アームカール、トライセプスエクステンション<br><b>ポイント：</b>肘を体側に固定し、伸ばすときも曲げるときもストレッチを感じる。<br><b>よくあるミス：</b>肘が動く、体を振って持ち上げる。</div><div class="kn-part"><div class="kn-part-name"><span class="kn-dot" style="background:var(--series-3)"></span>脚（大腿四頭筋・ハムストリング）</div><b>代表種目：</b>スクワット、レッグプレス、ルーマニアンデッドリフト<br><b>ポイント：</b>膝とつま先を同じ向きにする。足裏全体で床を踏む。<br><b>よくあるミス：</b>膝が内側に入る、深さが浅いまま重量だけ増やす。</div><div class="kn-part"><div class="kn-part-name"><span class="kn-dot" style="background:var(--series-6)"></span>体幹（腹直筋）</div><b>代表種目：</b>クランチ、プランク<br><b>ポイント：</b>肋骨を骨盤に近づけるように丸める。息を吐きながら。<br><b>よくあるミス：</b>足や首の力で起き上がる、腰を反らせる。</div>
+      <div class="kn-h3">腕の種目選び</div>
+      <p class="kn-lead">三頭筋は「頭の上で伸ばす」種目が有利な可能性があります。立命館大学などの研究（2022年、EJSS、21人、週2回・12週間）では、片腕ずつ頭上エクステンションとプッシュダウンを行い、筋力の伸びは同等で、三頭筋の肥大は頭上側が約1.4倍でした。やや小規模の研究で、「常に頭上が優れる」という意味ではありません。二頭筋はアームカールとハンマーカールの組み合わせが定番です。前腕（フィンガーカール等）は、腕を太くしたいときの補助として無理のない量で十分です。</p>
+    </div>
+
+    <div class="card">
+      <h2>栄養・休養</h2>
+      <div class="kn-row"><span class="kn-k">タンパク質<br>（一般の目安）</span><span class="kn-v">成人男性 65g／日、成人女性 50g／日（18〜49歳、推奨量）<span class="kn-tag ok">確認済み</span><br>出典：厚生労働省 日本人の食事摂取基準（2025年版）</span></div>
+      <div class="kn-row"><span class="kn-k">タンパク質<br>（筋肉を増やす）</span><span class="kn-v">体重1kgあたり約1.6g／日がよく引用される目安（例：60kgなら約96g）<span class="kn-tag">未読・一般的な目安</span></span></div>
+      <div class="kn-row"><span class="kn-k">クレアチン</span><span class="kn-v">1日3〜5gを毎日。ISSN（国際スポーツ栄養学会）がエビデンスの多いサプリと位置づけ。腎疾患がある人は医師に相談<span class="kn-tag">未読・一般的な目安</span></span></div>
+      <div class="kn-row"><span class="kn-k">カロリー</span><span class="kn-v">筋肥大目的では、維持より少し多めが定番。体重の推移で調整<span class="kn-tag">一般的な目安</span></span></div>
+      <div class="kn-h3">睡眠と回復</div>
+      <p class="kn-lead">睡眠不足は筋肉の増えやすさを下げます。オーストラリア・カトリック大学などの研究（2021年、Physiological Reports、健康な若年13人）では、一晩完全に寝ないだけで筋タンパク質の合成が18%低下し、コルチゾールが21%上昇、テストステロンが24%低下しました。極端な条件なので、普段の少しの睡眠不足にそのまま当てはめることはできませんが、「寝ないと伸びにくい」方向は一致しています。</p>
+      <ul class="kn-list">
+        <li><b>同じ部位は中1〜2日空ける。</b>週2回というACSMの目安と相性がよいです。<span class="kn-tag">一般的な目安</span></li>
+        <li><b>オーバートレーニングのサイン。</b>重量や回数が数週間落ち続ける、睡眠の質が落ちる、疲れが抜けない、というときはボリュームを減らすデロード週を入れます。<span class="kn-tag">一般的な目安</span></li>
+        <li><b>痛みの見分け。</b>筋肉痛は2〜3日で落ち着くのが普通です。関節の鋭い痛みやシビレがあるときは中止して受診します。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>LiftLog で確認する<span class="sub">目安を、どの画面で見るか</span></h2>
+<div class="kn-row"><span class="kn-k">先月より増やせているか</span><span class="kn-v">ホームの「前月比の総重量ゲージ」「月間の総重量」</span></div><div class="kn-row"><span class="kn-k">重量が伸びているか</span><span class="kn-v">「重量の推移」グラフ、「現在のMAX」</span></div><div class="kn-row"><span class="kn-k">週2回以上やっているか</span><span class="kn-v">「月間トレーニング回数」、達成度リング、履歴のカレンダー</span></div><div class="kn-row"><span class="kn-k">部位の偏りがないか</span><span class="kn-v">履歴の日ごとの部位チップ、「部位ガイド」</span></div>
+    </div>
+
+    <div class="card">
+      <h2>参考にした情報源<span class="sub">2026年10月12日確認</span></h2>
+      <p class="kn-lead">本文を開いて読んだページは「読んだ」、アクセス制限で読めなかったページは「未読」としています。</p>
+<div class="kn-src"><a href="https://www.newswise.com/articles/acsm-unveils-landmark-2026-resistance-training-guidelines-first-update-in-17-years" target="_blank" rel="noopener noreferrer">ACSM プレスリリース（Newswise）</a><br>2026年ポジションスタンドの数値<span class="kn-tag ok">読んだ</span></div><div class="kn-src"><a href="https://acsm.org/science-spotlight-acsm-releases-new-position-stand-on-resistance-training/" target="_blank" rel="noopener noreferrer">ACSM 公式ページ</a><br>声明のタイトル・著者・掲載誌<span class="kn-tag ok">読んだ</span></div><div class="kn-src"><a href="https://acsm.org/wp-content/uploads/2026/03/Resistance-Training-Position-Stand-infographic.pdf" target="_blank" rel="noopener noreferrer">ACSM インフォグラフィック（PDF）</a><br>5つのポイント<span class="kn-tag ok">読んだ</span></div><div class="kn-src"><a href="https://www.mhlw.go.jp/content/10904750/001734207.pdf" target="_blank" rel="noopener noreferrer">厚生労働省 日本人の食事摂取基準（2025年版）スライド</a><br>タンパク質の推奨量<span class="kn-tag ok">読んだ</span></div><div class="kn-src"><a href="https://acuresearchbank.acu.edu.au/item/8w4w7/the-effect-of-acute-sleep-deprivation-on-skeletal-muscle-protein-synthesis-and-the-hormonal-environment" target="_blank" rel="noopener noreferrer">Lamon ら 2021（Physiological Reports）</a><br>一晩の睡眠不足と筋タンパク質合成<span class="kn-tag ok">読んだ</span></div><div class="kn-src"><a href="https://barbend.com/overhead-triceps-extensions-vs-pushdowns-muscle-growth-study" target="_blank" rel="noopener noreferrer">BarBend の研究紹介記事（Maeo ら 2022）</a><br>頭上エクステンションとプッシュダウンの比較（原著論文は未読）<span class="kn-tag ok">読んだ</span></div><div class="kn-src"><a href="https://pubmed.ncbi.nlm.nih.gov/28698222/" target="_blank" rel="noopener noreferrer">Morton らのタンパク質メタ解析（PubMed）</a><br>1.6g/kg/日の目安<span class="kn-tag">未読</span></div><div class="kn-src"><a href="https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0173-z" target="_blank" rel="noopener noreferrer">ISSN 2017 クレアチン声明</a><br>1日3〜5gの目安<span class="kn-tag">未読</span></div>
+      <p class="generated-note">フォームのポイント、休憩時間、カロリー、デロードなどの「一般的な目安」は、上の資料で確認したものではなく、現場でよく使われる教えをまとめたものです。トレーニングの進め方や服薬・持病に関わる判断は、医師や専門家に相談してください。</p>
     </div>
   </div>
   </section>
@@ -769,6 +849,16 @@
     });
   });
 
+
+  // ---- ガイドタブ内の切り替え（部位ガイド／知識まとめ）（2026-10-12） ----
+  document.querySelectorAll(".guide-toggle .cal-view-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".guide-toggle .cal-view-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".guide-pane").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.guide).classList.add("active");
+    });
+  });
 
   // ---- menu ----
   function renderMenu() {
