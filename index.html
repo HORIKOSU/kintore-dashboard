@@ -49,6 +49,8 @@
     --radius-pill:    999px;
   }
   * { box-sizing: border-box; }
+  /* ダブルタップでのズームを無効化（2026-10-13）。ピンチ操作でのズームは残す */
+  html, body, * { touch-action: manipulation; }
   body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--page-plane); color: var(--text-primary); }
   header.app-header { margin: 18px 20px 0; padding: 24px 26px; border-radius: var(--radius-card); background: var(--surface-dark); box-shadow: var(--shadow-dark); }
   header.app-header h1 { margin: 0 0 6px; font-size: 21px; font-weight: 800; color: var(--text-on-dark); }
