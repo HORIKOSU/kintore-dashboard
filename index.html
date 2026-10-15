@@ -354,6 +354,33 @@
   .add-result.is-max .add-result-badge { background: var(--series-4); }
   .add-result-total { margin-top: 10px; font-size: 12px; color: var(--text-secondary); text-align: right; }
 
+  /* 2026-10-15：今月の総重量で進化するキャラ（案A：たまご→伝説の6段階） */
+  .char-stage { position: relative; overflow: hidden; margin-top: 8px; padding: 6px 10px 14px; text-align: center; border-radius: 16px; background: linear-gradient(180deg, #fff7ec 0%, #ffe9d2 100%); }
+  .char-lvb { position: absolute; left: 12px; top: 12px; z-index: 2; background: #1f3a3d; color: #fff; border-radius: 999px; padding: 4px 12px; font-weight: 800; font-size: 12px; }
+  .char-fig { width: 190px; max-width: 70%; margin: 0 auto; transform-origin: 50% 90%; animation: charBob 2.6s ease-in-out infinite; }
+  .char-fig svg { width: 100%; height: auto; display: block; }
+  .char-name { font-size: 22px; font-weight: 800; margin-top: -4px; color: #211f1a; }
+  .char-kg { font-size: 12px; color: #6e6a60; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  @keyframes charBob { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(-5px) scale(1.015, 0.985); } }
+  .char-stage.evolve .char-fig { animation: charEvolve 1.3s cubic-bezier(.2,.9,.3,1.2) 1, charBob 2.6s ease-in-out 1.3s infinite; }
+  @keyframes charEvolve { 0% { transform: scale(.55); filter: brightness(2.4); opacity: .2; } 35% { transform: scale(1.22); filter: brightness(1.6); opacity: 1; } 65% { transform: scale(.94); filter: brightness(1.1); } 100% { transform: scale(1); filter: none; } }
+  .char-stage.evolve::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 55%, rgba(255,255,255,.95), rgba(255,226,122,.55) 40%, rgba(255,226,122,0) 70%); animation: charFlash 1.3s ease-out 1 forwards; }
+  @keyframes charFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .char-banner { position: absolute; left: 0; right: 0; top: 14px; z-index: 3; font-size: 20px; font-weight: 900; color: #eb6834; text-shadow: 0 2px 0 #fff, 0 0 12px rgba(255,255,255,.9); opacity: 0; pointer-events: none; }
+  .char-stage.evolve .char-banner { animation: charBanner 2.2s ease-out .15s 1 forwards; }
+  @keyframes charBanner { 0% { opacity: 0; transform: translateY(8px) scale(.8); } 20% { opacity: 1; transform: translateY(0) scale(1.08); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-10px); } }
+  .char-bar { position: relative; height: 26px; margin: 12px 4px 0; border-radius: 8px; background: var(--gridline); overflow: hidden; }
+  .char-fill { height: 100%; width: 0; border-radius: 8px 0 0 8px; background: var(--surface-dark); display: flex; align-items: center; padding-left: 10px; color: var(--text-on-dark); font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; transition: width 1.1s cubic-bezier(.2,.8,.2,1); }
+  .char-fill.max { background: #f2b705; color: #1f3a3d; border-radius: 8px; }
+  .char-scale { display: flex; justify-content: space-between; margin: 4px 4px 0; font-size: 10px; color: var(--text-secondary); }
+  .char-next { margin: 10px 4px 0; font-size: 14px; font-weight: 800; color: var(--surface-dark); }
+  .char-next b { color: #eb6834; font-variant-numeric: tabular-nums; }
+  .char-dots { display: flex; gap: 6px; justify-content: center; margin-top: 12px; }
+  .char-dots i { width: 30px; height: 30px; border-radius: 50%; background: var(--gridline); display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 10px; font-weight: 800; color: var(--text-secondary); }
+  .char-dots i.on { background: var(--surface-dark); color: var(--text-on-dark); }
+  .char-dots i.cur { background: #eb6834; color: #fff; box-shadow: 0 0 0 3px rgba(235,104,52,.25); }
+  @media (prefers-reduced-motion: reduce) { .char-fig, .char-stage.evolve .char-fig { animation: none; } .char-stage.evolve::after, .char-stage.evolve .char-banner { animation: none; display: none; } .char-fill { transition: none; } }
+
   /* 2026-10-08：「前月の総重量に対して、今月はあと何%かをゲージで表して」への対応 */
   .vg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .vg-main { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--surface-dark); }
@@ -414,6 +441,11 @@
         <div id="heroRingLabel" class="hero-ring-label">今月 0/0 回</div>
         <button type="button" id="heroAddBtn" class="data-io-btn hero-add-btn">＋ 記録を追加</button>
       </div>
+    </div>
+
+    <div class="card" id="charCard">
+      <h2>今月のマッチョ<span class="sub">総重量で進化</span></h2>
+      <div id="charCardBody"></div>
     </div>
 
     <div class="card" id="volumeGaugeCard">
@@ -846,7 +878,7 @@
       document.querySelectorAll("section.panel").forEach(function (p) { p.classList.remove("active"); });
       btn.classList.add("active");
       document.getElementById(btn.dataset.tab).classList.add("active");
-      if (btn.dataset.tab === "dashboard") { renderVolumeGauge(); playHeroRing(); countUpIn("dashboard"); }
+      if (btn.dataset.tab === "dashboard") { renderCharCard(); renderVolumeGauge(); playHeroRing(); countUpIn("dashboard"); }
       if (btn.dataset.tab === "history") { countUpIn("historyTableWrap"); }
     });
   });
@@ -1705,6 +1737,89 @@
     animateVolumeGauge(fillPct, ratio, cur, done, curKgText, fillText);
   }
 
+  // ---- 今月の総重量で進化するキャラ（2026-10-15・案A） ----
+  // 今月（カレンダー月）の総重量（全種目の重量×回数）で6段階に進化。月が替わると0kgに戻り、たまご期から育て直し。
+  var CHAR_STAGES = [
+    { name: "たまご期", th: 0 }, { name: "ひよっこ", th: 1000 }, { name: "見習い", th: 5000 },
+    { name: "鉄人", th: 10000 }, { name: "怪力", th: 20000 }, { name: "伝説", th: 35000 }
+  ];
+  var CHAR_SVGS = [
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 240 220\" width=\"240\" height=\"220\"><defs><radialGradient id=\"g__U__\" cx=\"50%\" cy=\"40%\" r=\"60%\"><stop offset=\"0\" stop-color=\"#fff3d6\"/><stop offset=\"1\" stop-color=\"#f0dcae\"/></radialGradient><radialGradient id=\"au__U__\" cx=\"50%\" cy=\"55%\" r=\"50%\"><stop offset=\"0\" stop-color=\"#ff9a5c\" stop-opacity=\".75\"/><stop offset=\"1\" stop-color=\"#ff9a5c\" stop-opacity=\"0\"/></radialGradient></defs><ellipse cx=\"100\" cy=\"196\" rx=\"40\" ry=\"7\" fill=\"#000\" opacity=\".12\"/><ellipse cx=\"84.7\" cy=\"168\" rx=\"14\" ry=\"8\" fill=\"#f0dcae\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"115.3\" cy=\"168\" rx=\"14\" ry=\"8\" fill=\"#f0dcae\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M100 86 C137.4 94 135.7 170 100 170 C64.3 170 62.599999999999994 94 100 86 Z\" fill=\"url(#g__U__)\" stroke=\"#1f3a3d\" stroke-width=\"4\"/><path d=\"M72 110 l8 8 l8 -10 l8 10 l8 -8 l8 10 l8 -10\" stroke=\"#1f3a3d\" stroke-width=\"3\" fill=\"none\" stroke-linejoin=\"round\" stroke-linecap=\"round\" opacity=\".55\"/><circle cx=\"82\" cy=\"150\" r=\"4\" fill=\"#f0dcae\"/><circle cx=\"116\" cy=\"158\" r=\"5\" fill=\"#f0dcae\"/><circle cx=\"104\" cy=\"142\" r=\"3\" fill=\"#f0dcae\"/><path d=\"M81.44 116 q7 6 14 0\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M104.56 116 q7 6 14 0\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M94 130 q6 4 12 0\" stroke=\"#1f3a3d\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 240 220\" width=\"240\" height=\"220\"><defs><radialGradient id=\"g__U__\" cx=\"50%\" cy=\"40%\" r=\"60%\"><stop offset=\"0\" stop-color=\"#ffd58a\"/><stop offset=\"1\" stop-color=\"#f0b866\"/></radialGradient><radialGradient id=\"au__U__\" cx=\"50%\" cy=\"55%\" r=\"50%\"><stop offset=\"0\" stop-color=\"#ff9a5c\" stop-opacity=\".75\"/><stop offset=\"1\" stop-color=\"#ff9a5c\" stop-opacity=\"0\"/></radialGradient></defs><ellipse cx=\"100\" cy=\"196\" rx=\"44\" ry=\"7\" fill=\"#000\" opacity=\".12\"/><ellipse cx=\"82.9\" cy=\"170\" rx=\"14\" ry=\"8\" fill=\"#f0b866\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"117.1\" cy=\"170\" rx=\"14\" ry=\"8\" fill=\"#f0b866\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M68 126 Q58 136 54 148\" stroke=\"#1f3a3d\" stroke-width=\"13\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M68 126 Q58 136 54 148\" stroke=\"#ffd58a\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M132 126 Q142 136 146 148\" stroke=\"#1f3a3d\" stroke-width=\"13\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M132 126 Q142 136 146 148\" stroke=\"#ffd58a\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/><ellipse cx=\"100\" cy=\"128\" rx=\"38\" ry=\"44\" fill=\"url(#g__U__)\" stroke=\"#1f3a3d\" stroke-width=\"4\"/><ellipse cx=\"87.08\" cy=\"116\" rx=\"6\" ry=\"7.5\" fill=\"#1f3a3d\"/><circle cx=\"88.88\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><ellipse cx=\"112.92\" cy=\"116\" rx=\"6\" ry=\"7.5\" fill=\"#1f3a3d\"/><circle cx=\"114.72\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><path d=\"M94 135 q6 6 12 0\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><ellipse cx=\"77.08\" cy=\"128\" rx=\"6\" ry=\"3.5\" fill=\"#ff7a7a\" opacity=\".5\"/><ellipse cx=\"122.92\" cy=\"128\" rx=\"6\" ry=\"3.5\" fill=\"#ff7a7a\" opacity=\".5\"/><path d=\"M100 84 q-1 -12 -6 -16 M100 84 q2 -12 9 -14\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><ellipse cx=\"91\" cy=\"66\" rx=\"6\" ry=\"4\" fill=\"#5fcf80\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" transform=\"rotate(-30 91 66)\"/><ellipse cx=\"111\" cy=\"68\" rx=\"6\" ry=\"4\" fill=\"#5fcf80\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" transform=\"rotate(30 111 68)\"/></svg>",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 240 220\" width=\"240\" height=\"220\"><defs><radialGradient id=\"g__U__\" cx=\"50%\" cy=\"40%\" r=\"60%\"><stop offset=\"0\" stop-color=\"#f6a86a\"/><stop offset=\"1\" stop-color=\"#e0884a\"/></radialGradient><radialGradient id=\"au__U__\" cx=\"50%\" cy=\"55%\" r=\"50%\"><stop offset=\"0\" stop-color=\"#ff9a5c\" stop-opacity=\".75\"/><stop offset=\"1\" stop-color=\"#ff9a5c\" stop-opacity=\"0\"/></radialGradient></defs><ellipse cx=\"100\" cy=\"196\" rx=\"50\" ry=\"7\" fill=\"#000\" opacity=\".12\"/><ellipse cx=\"80.2\" cy=\"174\" rx=\"14\" ry=\"8\" fill=\"#e0884a\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"119.8\" cy=\"174\" rx=\"14\" ry=\"8\" fill=\"#e0884a\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M62 126 Q52 136 48 148\" stroke=\"#1f3a3d\" stroke-width=\"16\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M62 126 Q52 136 48 148\" stroke=\"#f6a86a\" stroke-width=\"10\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"54\" cy=\"135\" r=\"6\" fill=\"#f6a86a\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M138 126 Q148 136 152 148\" stroke=\"#1f3a3d\" stroke-width=\"16\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M138 126 Q148 136 152 148\" stroke=\"#f6a86a\" stroke-width=\"10\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"146\" cy=\"135\" r=\"6\" fill=\"#f6a86a\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"100\" cy=\"128\" rx=\"44\" ry=\"48\" fill=\"url(#g__U__)\" stroke=\"#1f3a3d\" stroke-width=\"4\"/><ellipse cx=\"85.03999999999999\" cy=\"116\" rx=\"6\" ry=\"7.5\" fill=\"#1f3a3d\"/><circle cx=\"86.83999999999999\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><ellipse cx=\"114.96000000000001\" cy=\"116\" rx=\"6\" ry=\"7.5\" fill=\"#1f3a3d\"/><circle cx=\"116.76\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><path d=\"M91 133 q9 10 18 0\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><ellipse cx=\"75.03999999999999\" cy=\"128\" rx=\"6\" ry=\"3.5\" fill=\"#ff7a7a\" opacity=\".5\"/><ellipse cx=\"124.96000000000001\" cy=\"128\" rx=\"6\" ry=\"3.5\" fill=\"#ff7a7a\" opacity=\".5\"/><path d=\"M60 96 Q100 88 140 96\" stroke=\"#1f3a3d\" stroke-width=\"9\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M60 96 Q100 88 140 96\" stroke=\"#fbf5ea\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M138 95 l12 -4 l-3 10 l10 4 l-14 1 Z\" fill=\"#fbf5ea\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><circle cx=\"100\" cy=\"91\" r=\"4\" fill=\"#eb6834\"/></svg>",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 240 220\" width=\"240\" height=\"220\"><defs><radialGradient id=\"g__U__\" cx=\"50%\" cy=\"40%\" r=\"60%\"><stop offset=\"0\" stop-color=\"#f08a4b\"/><stop offset=\"1\" stop-color=\"#d96f35\"/></radialGradient><radialGradient id=\"au__U__\" cx=\"50%\" cy=\"55%\" r=\"50%\"><stop offset=\"0\" stop-color=\"#ff9a5c\" stop-opacity=\".75\"/><stop offset=\"1\" stop-color=\"#ff9a5c\" stop-opacity=\"0\"/></radialGradient></defs><ellipse cx=\"100\" cy=\"196\" rx=\"56\" ry=\"7\" fill=\"#000\" opacity=\".12\"/><g transform=\"translate(28,184)\"><rect x=\"0\" y=\"-3\" width=\"26\" height=\"6\" rx=\"3\" fill=\"#555\"/><rect x=\"-3\" y=\"-10\" width=\"8\" height=\"20\" rx=\"3\" fill=\"#1f3a3d\"/><rect x=\"21\" y=\"-10\" width=\"8\" height=\"20\" rx=\"3\" fill=\"#1f3a3d\"/></g><ellipse cx=\"77.5\" cy=\"178\" rx=\"14\" ry=\"8\" fill=\"#d96f35\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"122.5\" cy=\"178\" rx=\"14\" ry=\"8\" fill=\"#d96f35\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M56 132 L26 130 L22 100\" stroke=\"#1f3a3d\" stroke-width=\"20\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M56 132 L26 130 L22 100\" stroke=\"#f08a4b\" stroke-width=\"14\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><ellipse cx=\"18.5\" cy=\"113.0\" rx=\"8.8\" ry=\"11\" fill=\"#f08a4b\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><circle cx=\"22\" cy=\"96\" r=\"10.700000000000001\" fill=\"#f08a4b\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M144 132 L174 130 L178 100\" stroke=\"#1f3a3d\" stroke-width=\"20\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M144 132 L174 130 L178 100\" stroke=\"#f08a4b\" stroke-width=\"14\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><ellipse cx=\"181.5\" cy=\"113.0\" rx=\"8.8\" ry=\"11\" fill=\"#f08a4b\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><circle cx=\"178\" cy=\"96\" r=\"10.700000000000001\" fill=\"#f08a4b\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"100\" cy=\"128\" rx=\"50\" ry=\"52\" fill=\"url(#g__U__)\" stroke=\"#1f3a3d\" stroke-width=\"4\"/><ellipse cx=\"83.0\" cy=\"116\" rx=\"6\" ry=\"7.5\" fill=\"#1f3a3d\"/><circle cx=\"84.8\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><ellipse cx=\"117.0\" cy=\"116\" rx=\"6\" ry=\"7.5\" fill=\"#1f3a3d\"/><circle cx=\"118.8\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><path d=\"M92.0 105 L74.0 110\" stroke=\"#1f3a3d\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M108.0 105 L126.0 110\" stroke=\"#1f3a3d\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M89 133 h22 q-2 10 -11 10 q-9 0 -11 -10 Z\" fill=\"#fff\" stroke=\"#1f3a3d\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M96 133 v9 M104 133 v9\" stroke=\"#1f3a3d\" stroke-width=\"1.8\"/><path d=\"M54 92 Q100 84 146 92\" stroke=\"#1f3a3d\" stroke-width=\"9\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M54 92 Q100 84 146 92\" stroke=\"#fbf5ea\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M144 91 l12 -4 l-3 10 l10 4 l-14 1 Z\" fill=\"#fbf5ea\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><circle cx=\"100\" cy=\"87\" r=\"4\" fill=\"#eb6834\"/><path d=\"M36 34.4 L39.0 41.0 L45.6 44 L39.0 47.0 L36 53.6 L33.0 47.0 L26.4 44 L33.0 41.0 Z\" fill=\"#f2b705\"/><path d=\"M166 32.0 L168.5 37.5 L174.0 40 L168.5 42.5 L166 48.0 L163.5 42.5 L158.0 40 L163.5 37.5 Z\" fill=\"#f2b705\"/><path d=\"M150 63.6 L152.0 68.0 L156.4 70 L152.0 72.0 L150 76.4 L148.0 72.0 L143.6 70 L148.0 68.0 Z\" fill=\"#f2b705\"/></svg>",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 240 220\" width=\"240\" height=\"220\"><defs><radialGradient id=\"g__U__\" cx=\"50%\" cy=\"40%\" r=\"60%\"><stop offset=\"0\" stop-color=\"#e8672f\"/><stop offset=\"1\" stop-color=\"#c9501c\"/></radialGradient><radialGradient id=\"au__U__\" cx=\"50%\" cy=\"55%\" r=\"50%\"><stop offset=\"0\" stop-color=\"#ff9a5c\" stop-opacity=\".75\"/><stop offset=\"1\" stop-color=\"#ff9a5c\" stop-opacity=\"0\"/></radialGradient></defs><circle cx=\"100\" cy=\"125\" r=\"80\" fill=\"url(#au__U__)\"/><path d=\"M34 114 C25 104 31 94 34 86 C37 94 43 104 34 114 Z\" fill=\"#ff8a3d\" opacity=\".85\"/><path d=\"M168 110 C159 100 165 90 168 82 C171 90 177 100 168 110 Z\" fill=\"#ff8a3d\" opacity=\".85\"/><path d=\"M28 164 C19 154 25 144 28 136 C31 144 37 154 28 164 Z\" fill=\"#ff8a3d\" opacity=\".85\"/><path d=\"M174 164 C165 154 171 144 174 136 C177 144 183 154 174 164 Z\" fill=\"#ff8a3d\" opacity=\".85\"/><ellipse cx=\"100\" cy=\"196\" rx=\"62\" ry=\"7\" fill=\"#000\" opacity=\".12\"/><g transform=\"translate(80.0,194)\"><rect x=\"0\" y=\"-3\" width=\"40\" height=\"6\" rx=\"3\" fill=\"#666\"/><rect x=\"-5\" y=\"-14\" width=\"10\" height=\"28\" rx=\"3\" fill=\"#1f3a3d\"/><rect x=\"35\" y=\"-14\" width=\"10\" height=\"28\" rx=\"3\" fill=\"#1f3a3d\"/></g><ellipse cx=\"74.8\" cy=\"182\" rx=\"14\" ry=\"8\" fill=\"#c9501c\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"125.2\" cy=\"182\" rx=\"14\" ry=\"8\" fill=\"#c9501c\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M50 132 L16 130 L18 100\" stroke=\"#1f3a3d\" stroke-width=\"25\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M50 132 L16 130 L18 100\" stroke=\"#e8672f\" stroke-width=\"19\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><ellipse cx=\"9.5\" cy=\"113.0\" rx=\"12.0\" ry=\"15\" fill=\"#e8672f\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><circle cx=\"18\" cy=\"96\" r=\"13.450000000000001\" fill=\"#e8672f\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M150 132 L184 130 L182 100\" stroke=\"#1f3a3d\" stroke-width=\"25\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M150 132 L184 130 L182 100\" stroke=\"#e8672f\" stroke-width=\"19\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><ellipse cx=\"190.5\" cy=\"113.0\" rx=\"12.0\" ry=\"15\" fill=\"#e8672f\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><circle cx=\"182\" cy=\"96\" r=\"13.450000000000001\" fill=\"#e8672f\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"100\" cy=\"128\" rx=\"56\" ry=\"56\" fill=\"url(#g__U__)\" stroke=\"#1f3a3d\" stroke-width=\"4\"/><path d=\"M100 136 v42\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" opacity=\".35\"/><path d=\"M86 144 h28\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" opacity=\".35\" stroke-linecap=\"round\"/><path d=\"M86 158 h28\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" opacity=\".35\" stroke-linecap=\"round\"/><ellipse cx=\"80.96\" cy=\"116\" rx=\"6.5\" ry=\"8.0\" fill=\"#1f3a3d\"/><circle cx=\"82.75999999999999\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><ellipse cx=\"119.04\" cy=\"116\" rx=\"6.5\" ry=\"8.0\" fill=\"#1f3a3d\"/><circle cx=\"120.84\" cy=\"113.5\" r=\"2\" fill=\"#fff\"/><path d=\"M89.96 105 L71.96 110\" stroke=\"#1f3a3d\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M110.04 105 L128.04000000000002 110\" stroke=\"#1f3a3d\" stroke-width=\"4\" stroke-linecap=\"round\"/><ellipse cx=\"100\" cy=\"138\" rx=\"12\" ry=\"9\" fill=\"#1f3a3d\"/><ellipse cx=\"100\" cy=\"143\" rx=\"7\" ry=\"4\" fill=\"#ff7a7a\"/><path d=\"M48 88 Q100 80 152 88\" stroke=\"#1f3a3d\" stroke-width=\"9\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M48 88 Q100 80 152 88\" stroke=\"#fff\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M150 87 l12 -4 l-3 10 l10 4 l-14 1 Z\" fill=\"#fff\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><circle cx=\"100\" cy=\"83\" r=\"4\" fill=\"#eb6834\"/><path d=\"M36 34.4 L39.0 41.0 L45.6 44 L39.0 47.0 L36 53.6 L33.0 47.0 L26.4 44 L33.0 41.0 Z\" fill=\"#f2b705\"/><path d=\"M166 32.0 L168.5 37.5 L174.0 40 L168.5 42.5 L166 48.0 L163.5 42.5 L158.0 40 L163.5 37.5 Z\" fill=\"#f2b705\"/><path d=\"M150 63.6 L152.0 68.0 L156.4 70 L152.0 72.0 L150 76.4 L148.0 72.0 L143.6 70 L148.0 68.0 Z\" fill=\"#f2b705\"/></svg>",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 240 220\" width=\"240\" height=\"220\"><defs><radialGradient id=\"g__U__\" cx=\"50%\" cy=\"40%\" r=\"60%\"><stop offset=\"0\" stop-color=\"#f2b705\"/><stop offset=\"1\" stop-color=\"#d99a00\"/></radialGradient><radialGradient id=\"au__U__\" cx=\"50%\" cy=\"55%\" r=\"50%\"><stop offset=\"0\" stop-color=\"#ffe27a\" stop-opacity=\".75\"/><stop offset=\"1\" stop-color=\"#ffe27a\" stop-opacity=\"0\"/></radialGradient></defs><circle cx=\"100\" cy=\"125\" r=\"92\" fill=\"url(#au__U__)\"/><path transform=\"translate(26,70) rotate(-15) scale(1)\" d=\"M6 0 L-6 16 L2 16 L-4 32 L10 12 L2 12 Z\" fill=\"#f2b705\" stroke=\"#fff6c9\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path transform=\"translate(168,62) rotate(12) scale(1)\" d=\"M6 0 L-6 16 L2 16 L-4 32 L10 12 L2 12 Z\" fill=\"#f2b705\" stroke=\"#fff6c9\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path transform=\"translate(20,150) rotate(10) scale(0.8)\" d=\"M6 0 L-6 16 L2 16 L-4 32 L10 12 L2 12 Z\" fill=\"#f2b705\" stroke=\"#fff6c9\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path transform=\"translate(176,148) rotate(-10) scale(0.8)\" d=\"M6 0 L-6 16 L2 16 L-4 32 L10 12 L2 12 Z\" fill=\"#f2b705\" stroke=\"#fff6c9\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><ellipse cx=\"100\" cy=\"196\" rx=\"66\" ry=\"7\" fill=\"#000\" opacity=\".12\"/><g transform=\"translate(74.0,194)\"><rect x=\"0\" y=\"-3\" width=\"52\" height=\"6\" rx=\"3\" fill=\"#666\"/><rect x=\"-5\" y=\"-14\" width=\"10\" height=\"28\" rx=\"3\" fill=\"#1f3a3d\"/><rect x=\"47\" y=\"-14\" width=\"10\" height=\"28\" rx=\"3\" fill=\"#1f3a3d\"/></g><ellipse cx=\"73.0\" cy=\"184\" rx=\"14\" ry=\"8\" fill=\"#d99a00\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"127.0\" cy=\"184\" rx=\"14\" ry=\"8\" fill=\"#d99a00\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M46 132 L12 130 L14 96\" stroke=\"#1f3a3d\" stroke-width=\"28\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M46 132 L12 130 L14 96\" stroke=\"#f2b705\" stroke-width=\"22\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><ellipse cx=\"4.0\" cy=\"111.0\" rx=\"14.4\" ry=\"18\" fill=\"#f2b705\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><circle cx=\"14\" cy=\"92\" r=\"15.100000000000001\" fill=\"#f2b705\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><path d=\"M154 132 L188 130 L186 96\" stroke=\"#1f3a3d\" stroke-width=\"28\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M154 132 L188 130 L186 96\" stroke=\"#f2b705\" stroke-width=\"22\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><ellipse cx=\"196.0\" cy=\"111.0\" rx=\"14.4\" ry=\"18\" fill=\"#f2b705\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><circle cx=\"186\" cy=\"92\" r=\"15.100000000000001\" fill=\"#f2b705\" stroke=\"#1f3a3d\" stroke-width=\"3\"/><ellipse cx=\"100\" cy=\"128\" rx=\"60\" ry=\"58\" fill=\"url(#g__U__)\" stroke=\"#1f3a3d\" stroke-width=\"4\"/><path d=\"M100 136 v44\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" opacity=\".35\"/><path d=\"M86 144 h28\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" opacity=\".35\" stroke-linecap=\"round\"/><path d=\"M86 158 h28\" stroke=\"#1f3a3d\" stroke-width=\"2.5\" opacity=\".35\" stroke-linecap=\"round\"/><path d=\"M79.6 107 l3 7 l7 1 l-5 5 l2 8 l-7 -4 l-7 4 l2 -8 l-5 -5 l7 -1 Z\" fill=\"#1f3a3d\"/><path d=\"M120.4 107 l3 7 l7 1 l-5 5 l2 8 l-7 -4 l-7 4 l2 -8 l-5 -5 l7 -1 Z\" fill=\"#1f3a3d\"/><path d=\"M88.6 105 L70.6 110\" stroke=\"#1f3a3d\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M111.4 105 L129.4 110\" stroke=\"#1f3a3d\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M88 134 q12 12 24 -2\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M78 78 L74 52 L90 66 L100 46 L110 66 L126 52 L122 78 Z\" fill=\"#f2b705\" stroke=\"#1f3a3d\" stroke-width=\"3.5\" stroke-linejoin=\"round\"/><circle cx=\"74\" cy=\"52\" r=\"3.5\" fill=\"#ff5a5a\" stroke=\"#1f3a3d\" stroke-width=\"2\"/><circle cx=\"100\" cy=\"46\" r=\"3.5\" fill=\"#ff5a5a\" stroke=\"#1f3a3d\" stroke-width=\"2\"/><circle cx=\"126\" cy=\"52\" r=\"3.5\" fill=\"#ff5a5a\" stroke=\"#1f3a3d\" stroke-width=\"2\"/><path d=\"M36 34.4 L39.0 41.0 L45.6 44 L39.0 47.0 L36 53.6 L33.0 47.0 L26.4 44 L33.0 41.0 Z\" fill=\"#f2b705\"/><path d=\"M166 32.0 L168.5 37.5 L174.0 40 L168.5 42.5 L166 48.0 L163.5 42.5 L158.0 40 L163.5 37.5 Z\" fill=\"#f2b705\"/><path d=\"M150 63.6 L152.0 68.0 L156.4 70 L152.0 72.0 L150 76.4 L148.0 72.0 L143.6 70 L148.0 68.0 Z\" fill=\"#f2b705\"/></svg>"
+  ];
+  var CHAR_SEEN_KEY = "kintore_char_seen_v1";
+  var charEvolvePending = false;   // 記録追加でレベルが上がった直後だけ true。ホームを開いたときに進化演出を再生する
+  function charLevelFor(v) {
+    var lv = 0;
+    for (var i = 0; i < CHAR_STAGES.length; i++) { if (v >= CHAR_STAGES[i].th) lv = i; }
+    return lv;
+  }
+  function charSeenRead() {
+    try { var o = JSON.parse(localStorage.getItem(CHAR_SEEN_KEY) || "null"); if (o && typeof o.m === "string" && typeof o.lv === "number") return o; } catch (e) {}
+    return null;
+  }
+  function charSeenWrite(m, lv) {
+    try { localStorage.setItem(CHAR_SEEN_KEY, JSON.stringify({ m: m, lv: lv })); } catch (e) {}
+  }
+  function charCurKey() { return monthKey(todayLocalStr()); }
+  // 記録追加の直後に呼ぶ：レベルが上がっていたらトーストで知らせ、ホームを開いたときの進化演出を予約する
+  function checkCharLevelUp() {
+    var key = charCurKey();
+    var lv = charLevelFor(monthTotalVolume(key));
+    var seen = charSeenRead();
+    if (seen && seen.m === key && lv > seen.lv) {
+      charEvolvePending = true;
+      setTimeout(function () { showToast("🎉 進化！ Lv." + (lv + 1) + " " + CHAR_STAGES[lv].name + " になりました"); }, 1600);
+    }
+  }
+  function renderCharCard() {
+    var body = document.getElementById("charCardBody");
+    if (!body) return;
+    var key = charCurKey();
+    var cur = Math.round(monthTotalVolume(key));
+    var lv = charLevelFor(cur);
+    var st = CHAR_STAGES[lv];
+    var homeActive = document.getElementById("dashboard").classList.contains("active");
+    var evolve = false;
+    if (homeActive) {
+      var seen = charSeenRead();
+      if (!seen || seen.m !== key || lv < seen.lv) { charSeenWrite(key, lv); }
+      else if (lv > seen.lv) { evolve = charEvolvePending; charSeenWrite(key, lv); }
+      charEvolvePending = false;
+    }
+    var isMax = lv >= CHAR_STAGES.length - 1;
+    var nx = isMax ? null : CHAR_STAGES[lv + 1];
+    var pct = isMax ? 100 : Math.max(0, Math.min(100, (cur - st.th) / (nx.th - st.th) * 100));
+    var dots = "";
+    for (var k = 0; k < CHAR_STAGES.length; k++) dots += '<i class="' + (k < lv ? "on" : (k === lv ? "cur" : "")) + '">' + (k + 1) + '</i>';
+    var svg = CHAR_SVGS[lv].replace(/__U__/g, "ch" + lv);
+    var curTxt = cur.toLocaleString() + "kg";
+    body.innerHTML =
+      '<div class="char-stage' + (evolve ? " evolve" : "") + '">' +
+        '<span class="char-lvb">Lv.' + (lv + 1) + '</span>' +
+        '<div class="char-banner">✨ 進化！ ✨</div>' +
+        '<div class="char-fig" role="img" aria-label="Lv.' + (lv + 1) + ' ' + st.name + '">' + svg + '</div>' +
+        '<div class="char-name">' + st.name + '</div>' +
+        '<div class="char-kg">' + monthLabel(key) + 'の総重量 ' + curTxt + '</div>' +
+      '</div>' +
+      '<div class="char-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.floor(pct) + '">' +
+        '<div class="char-fill' + (isMax ? " max" : "") + '" id="charFill">' + (pct >= 22 || isMax ? curTxt : "") + '</div></div>' +
+      '<div class="char-scale"><span>' + st.th.toLocaleString() + 'kg</span><span>' + (isMax ? "最終進化" : nx.th.toLocaleString() + 'kg（Lv.' + (lv + 2) + ' ' + nx.name + '）') + '</span></div>' +
+      '<div class="char-next">' + (isMax
+        ? (cur - st.th > 0 ? '👑 最終進化！ さらに ' + (cur - st.th).toLocaleString() + 'kg 積み上げ中' : '👑 最終進化！ 伝説に到達しました')
+        : '次の進化まで あと <b>' + Math.max(0, nx.th - cur).toLocaleString() + 'kg</b> 🔥') + '</div>' +
+      '<div class="char-dots">' + dots + '</div>';
+    var fill = document.getElementById("charFill");
+    if (fill) {
+      if (prefersReducedMotion()) { fill.style.width = pct + "%"; }
+      else { fill.style.width = "0%"; void fill.offsetWidth; requestAnimationFrame(function () { requestAnimationFrame(function () { fill.style.width = pct + "%"; }); }); }
+    }
+  }
+
   // ---- 数字のカウントアップ（2026-10-11） ----
   // 「0 → 最終値」へ約0.9秒でカウントアップ。要素の先頭テキストの数字だけを動かし、単位・符号・小数桁・桁区切りはそのまま維持する。
   // 再描画で最終値が差し替わっても追従する。prefers-reduced-motion の端末では何もしない（即最終値）。
@@ -1768,6 +1883,7 @@
   function renderDashboard() {
     renderStatRow();
     renderHeroCard();
+    renderCharCard();
     renderVolumeGauge();
     renderMaxStatRow();
     populateFilterOptions(document.getElementById("freqExerciseFilter"), true);
@@ -2292,6 +2408,7 @@
     statusEl.className = "data-io-status success";
     showToast("✅ 追加しました：" + summaryText + "（" + date + "）");
     renderAll();
+    checkCharLevelUp();
     var addBtnEl = document.getElementById("addSubmitBtn");
     flashAddButton(addBtnEl, "✓ 追加しました");
     showAddResult(addBtnEl, exId, date, summaryText, false);
@@ -2324,6 +2441,7 @@
     statusEl.className = "data-io-status success";
     showToast("🏆 MAXを追加しました：" + summaryText + "（" + date + "）");
     renderAll();
+    checkCharLevelUp();
     var addMaxBtnEl = document.getElementById("addSubmitMaxBtn");
     flashAddButton(addMaxBtnEl, "✓ 追加しました");
     showAddResult(addMaxBtnEl, exId, date, summaryText, true);
